@@ -1,0 +1,6 @@
+.idea
+/vendor
+composer.lock
+http-client.env.json
+index.php
+icolud.http

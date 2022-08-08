@@ -1,0 +1,28 @@
+{
+    "name": "szwtdl/icloud",
+    "description": "apple icloud sdk",
+    "type": "library",
+    "require": {
+        "ext-json": "*",
+        "php": "^7.3",
+        "guzzlehttp/guzzle": "7.4.*"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Szwtdl\\Icloud\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "authors": [
+        {
+            "name": "szwtdl",
+            "email": "szpengjian@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable"
+}
