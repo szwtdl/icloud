@@ -102,7 +102,7 @@ class Application
         }
         return [
             'code' => 201,
-            'msg' => 'ok',
+            'msg' => 'fail',
             'data' => $result
         ];
     }
@@ -318,8 +318,19 @@ class Application
                 'msg' => 'ok',
                 'data' => [
                     'total' => $result['contents']['fileCount'],
-                    'folder' => [],
-                    'list' => $result['contents']
+                    'folder' => [
+                        'id' => $result['contents']['docwsid'],
+                        'name' => $result['contents']['name'],
+                        'parentId' => $result['contents']['parentId'],
+                        'type' => strtolower($result['contents']['type']),
+                        'size' => $result['contents']['assetQuota'],
+                        'create_time' => $result['contents']['dateCreated'],
+                        'modified_time' => $result['contents']['dateModified'],
+                        'changed_time' => $result['contents']['dateChanged'],
+                        'last_open_time' => $result['contents']['lastOpenTime'],
+                        'child_num' => $result['contents']['numberOfItems']
+                    ],
+                    'list' => $result['contents']['items']
                 ]
             ];
         }
