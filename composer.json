@@ -4,8 +4,7 @@
     "type": "library",
     "require": {
         "ext-json": "*",
-        "guzzlehttp/guzzle": "^7.4",
-        "monolog/monolog": "^3.2"
+        "guzzlehttp/guzzle": "^7.4"
     },
     "license": "MIT",
     "autoload": {
