@@ -10,7 +10,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
 
     public function register()
     {
-        $this->app->singleton(Paypal::class, function () {
+        $this->app->singleton(Application::class, function () {
             return Factory::make('icloud', [
                 'client_id' => config('services.icloud.client_id'),
                 'client_key' => config('services.icloud.client_key'),
