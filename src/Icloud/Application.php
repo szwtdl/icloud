@@ -2,11 +2,14 @@
 
 declare(strict_types=1);
 /**
- * This file is part of szwtdl/icloud
+ * This file is part of szwtdl/icloud.
+ *
  * @link     https://www.szwtdl.cn
  * @contact  szpengjian@gmail.com
+ *
  * @license  https://github.com/szwtdl/icloud/blob/master/LICENSE
  */
+
 namespace Cloud\Icloud;
 
 use Cloud\HttpRequest;
@@ -24,6 +27,7 @@ class Application
 
     /**
      * 账号登录.
+     *
      * @param $username
      * @param $password
      */
@@ -33,23 +37,25 @@ class Application
         if (isset($result['ec']) && $result['ec'] == '10000') {
             return [
                 'code' => 200,
-                'msg' => 'ok',
+                'msg'  => 'ok',
                 'data' => [
                     'status' => $result['status'],
-                    'code' => $result['ec'],
-                    'msg' => $result['em'],
+                    'code'   => $result['ec'],
+                    'msg'    => $result['em'],
                 ],
             ];
         }
+
         return [
             'code' => 201,
-            'msg' => 'fail',
+            'msg'  => 'fail',
             'data' => $result,
         ];
     }
 
     /**
      * 验证账号.
+     *
      * @param $username
      * @param $password
      * @param $code
@@ -58,35 +64,37 @@ class Application
     {
         $result = $this->request->postJson('v2/api/auth/verify', [
             'json' => [
-                'username' => $username,
-                'password' => $password,
+                'username'     => $username,
+                'password'     => $password,
                 'securityCode' => $code,
             ],
         ]);
         if (isset($result['ec']) && $result['ec'] === 10001) {
             return [
                 'code' => 201,
-                'msg' => 'fail',
+                'msg'  => 'fail',
                 'data' => [
                     'status' => $result['status'],
-                    'code' => $result['ec'],
-                    'msg' => $result['em'],
+                    'code'   => $result['ec'],
+                    'msg'    => $result['em'],
                 ],
             ];
         }
+
         return [
             'code' => 200,
-            'msg' => 'ok',
+            'msg'  => 'ok',
             'data' => [
                 'status' => $result['status'],
-                'code' => $result['ec'],
-                'msg' => $result['em'],
+                'code'   => $result['ec'],
+                'msg'    => $result['em'],
             ],
         ];
     }
 
     /**
      * 下载数据.
+     *
      * @param $username
      * @param $password
      */
@@ -101,19 +109,21 @@ class Application
         if (isset($result['status'], $result['ec']) && $result['ec'] == 200) {
             return [
                 'code' => 200,
-                'msg' => 'ok',
+                'msg'  => 'ok',
                 'data' => $result['em'],
             ];
         }
+
         return [
             'code' => 201,
-            'msg' => 'fail',
+            'msg'  => 'fail',
             'data' => $result,
         ];
     }
 
     /**
      * 重置session.
+     *
      * @param $username
      */
     public function reset($username): array
@@ -124,27 +134,29 @@ class Application
         if ($result['ec'] === 10001) {
             return [
                 'code' => 201,
-                'msg' => 'fail',
+                'msg'  => 'fail',
                 'data' => [
                     'status' => $result['status'],
-                    'code' => $result['ec'],
-                    'msg' => $result['em'],
+                    'code'   => $result['ec'],
+                    'msg'    => $result['em'],
                 ],
             ];
         }
+
         return [
             'code' => 200,
-            'msg' => 'ok',
+            'msg'  => 'ok',
             'data' => [
                 'status' => $result['status'],
-                'code' => $result['ec'],
-                'msg' => $result['em'],
+                'code'   => $result['ec'],
+                'msg'    => $result['em'],
             ],
         ];
     }
 
     /**
      * 账号设备列表.
+     *
      * @param $username
      */
     public function account($username): array
@@ -152,7 +164,7 @@ class Application
         $result = $this->request->postJson('v2/api/database/retrieve', [
             'json' => [
                 'username' => $username,
-                'params' => [
+                'params'   => [
                     'category' => 'ACCOUNT',
                 ],
             ],
@@ -162,21 +174,24 @@ class Application
             foreach ($result['contents']['devices'] as $device) {
                 $list[] = $device;
             }
+
             return [
                 'code' => 200,
-                'msg' => 'ok',
+                'msg'  => 'ok',
                 'data' => $list,
             ];
         }
+
         return [
             'code' => 200,
-            'msg' => 'ok',
+            'msg'  => 'ok',
             'data' => [],
         ];
     }
 
     /**
      * 联系人列表.
+     *
      * @param $username
      */
     public function contact($username, int $offset = 1, int $limit = 20): array
@@ -184,35 +199,37 @@ class Application
         $result = $this->request->postJson('v2/api/database/retrieve', [
             'json' => [
                 'username' => $username,
-                'params' => [
+                'params'   => [
                     'category' => 'CONTACT',
-                    'offset' => ($offset - 1) * $limit,
-                    'limit' => $limit,
+                    'offset'   => ($offset - 1) * $limit,
+                    'limit'    => $limit,
                 ],
             ],
         ]);
         if (isset($result['totalCount']) && $result['totalCount'] > 0 && isset($result['contents'])) {
             return [
                 'code' => 200,
-                'msg' => 'ok',
+                'msg'  => 'ok',
                 'data' => [
                     'total' => $result['totalCount'],
-                    'list' => $result['contents'],
+                    'list'  => $result['contents'],
                 ],
             ];
         }
+
         return [
             'code' => 200,
-            'msg' => 'ok',
+            'msg'  => 'ok',
             'data' => [
                 'total' => 0,
-                'list' => [],
+                'list'  => [],
             ],
         ];
     }
 
     /**
      * 定位列表.
+     *
      * @param $username
      */
     public function location($username, int $offset = 1, int $limit = 20): array
@@ -220,35 +237,37 @@ class Application
         $result = $this->request->postJson('v2/api/database/retrieve', [
             'json' => [
                 'username' => $username,
-                'params' => [
+                'params'   => [
                     'category' => 'LOCATION',
-                    'offset' => ($offset - 1) * $limit,
-                    'limit' => $limit,
+                    'offset'   => ($offset - 1) * $limit,
+                    'limit'    => $limit,
                 ],
             ],
         ]);
         if (isset($result['totalCount'], $result['contents'])) {
             return [
                 'code' => 200,
-                'msg' => 'ok',
+                'msg'  => 'ok',
                 'data' => [
                     'total' => $result['totalCount'],
-                    'list' => $result['contents'],
+                    'list'  => $result['contents'],
                 ],
             ];
         }
+
         return [
             'code' => 200,
-            'msg' => 'ok',
+            'msg'  => 'ok',
             'data' => [
                 'total' => 0,
-                'list' => [],
+                'list'  => [],
             ],
         ];
     }
 
     /**
      * 相册列表.
+     *
      * @param $username
      * @param $name
      */
@@ -257,11 +276,11 @@ class Application
         $result = $this->request->postJson('v2/api/database/retrieve', [
             'json' => [
                 'username' => $username,
-                'params' => [
+                'params'   => [
                     'category' => 'ALBUM_DETAIL',
-                    'offset' => ($offset - 1) * $limit,
-                    'limit' => $limit,
-                    'rid' => $name,
+                    'offset'   => ($offset - 1) * $limit,
+                    'limit'    => $limit,
+                    'rid'      => $name,
                 ],
             ],
         ]);
@@ -270,27 +289,30 @@ class Application
             foreach ($result['contents'] as $content) {
                 $list[] = $content;
             }
+
             return [
                 'code' => 200,
-                'msg' => 'ok',
+                'msg'  => 'ok',
                 'data' => [
                     'total' => $result['totalCount'],
-                    'list' => $list,
+                    'list'  => $list,
                 ],
             ];
         }
+
         return [
             'code' => 200,
-            'msg' => 'ok',
+            'msg'  => 'ok',
             'data' => [
                 'total' => 0,
-                'list' => [],
+                'list'  => [],
             ],
         ];
     }
 
     /**
      * 云盘数据.
+     *
      * @param $username
      */
     public function files($username, string $name = 'root'): array
@@ -298,47 +320,49 @@ class Application
         $result = $this->request->postJson('v2/api/database/retrieve', [
             'json' => [
                 'username' => $username,
-                'params' => [
+                'params'   => [
                     'category' => 'ICLOUD_DRIVE_DIR',
-                    'rid' => $name,
+                    'rid'      => $name,
                 ],
             ],
         ]);
         if (isset($result['contents']) && count($result['contents']) > 0) {
             return [
                 'code' => 200,
-                'msg' => 'ok',
+                'msg'  => 'ok',
                 'data' => [
-                    'total' => $result['contents']['fileCount'],
+                    'total'  => $result['contents']['fileCount'],
                     'folder' => [
-                        'id' => $result['contents']['docwsid'],
-                        'name' => $result['contents']['name'],
-                        'parentId' => str_replace('FOLDER::com.apple.CloudDocs::', '', $result['contents']['parentId']),
-                        'type' => strtolower($result['contents']['type']),
-                        'size' => format_size($result['contents']['assetQuota']),
-                        'create_time' => $result['contents']['dateCreated'],
-                        'modified_time' => $result['contents']['dateModified'],
-                        'changed_time' => $result['contents']['dateChanged'],
+                        'id'             => $result['contents']['docwsid'],
+                        'name'           => $result['contents']['name'],
+                        'parentId'       => str_replace('FOLDER::com.apple.CloudDocs::', '', $result['contents']['parentId']),
+                        'type'           => strtolower($result['contents']['type']),
+                        'size'           => format_size($result['contents']['assetQuota']),
+                        'create_time'    => $result['contents']['dateCreated'],
+                        'modified_time'  => $result['contents']['dateModified'],
+                        'changed_time'   => $result['contents']['dateChanged'],
                         'last_open_time' => $result['contents']['lastOpenTime'],
-                        'child_num' => $result['contents']['numberOfItems'],
+                        'child_num'      => $result['contents']['numberOfItems'],
                     ],
                     'list' => $result['contents']['items'],
                 ],
             ];
         }
+
         return [
             'code' => 200,
-            'msg' => 'ok',
+            'msg'  => 'ok',
             'data' => [
-                'total' => 0,
+                'total'  => 0,
                 'folder' => [],
-                'list' => [],
+                'list'   => [],
             ],
         ];
     }
 
     /**
      * 日历列表.
+     *
      * @param $username
      */
     public function calendar($username, int $offset = 1, int $limit = 20): array
@@ -346,10 +370,10 @@ class Application
         $result = $this->request->postJson('v2/api/database/retrieve', [
             'json' => [
                 'username' => $username,
-                'params' => [
+                'params'   => [
                     'category' => 'CALENDAR',
-                    'offset' => ($offset - 1) * $limit,
-                    'limit' => $limit,
+                    'offset'   => ($offset - 1) * $limit,
+                    'limit'    => $limit,
                 ],
             ],
         ]);
@@ -358,27 +382,30 @@ class Application
             foreach ($result['contents'] as $content) {
                 $list[] = $content;
             }
+
             return [
                 'code' => 200,
-                'msg' => 'ok',
+                'msg'  => 'ok',
                 'data' => [
                     'total' => $result['totalCount'],
-                    'list' => $list,
+                    'list'  => $list,
                 ],
             ];
         }
+
         return [
             'code' => 200,
-            'msg' => 'ok',
+            'msg'  => 'ok',
             'data' => [
                 'total' => 0,
-                'list' => [],
+                'list'  => [],
             ],
         ];
     }
 
     /**
      * 事件列表.
+     *
      * @param $username
      */
     public function events($username, int $offset = 1, int $limit = 20): array
@@ -386,10 +413,10 @@ class Application
         $result = $this->request->postJson('v2/api/database/retrieve', [
             'json' => [
                 'username' => $username,
-                'params' => [
+                'params'   => [
                     'category' => 'EVENT',
-                    'offset' => ($offset - 1) * $limit,
-                    'limit' => $limit,
+                    'offset'   => ($offset - 1) * $limit,
+                    'limit'    => $limit,
                 ],
             ],
         ]);
@@ -398,27 +425,30 @@ class Application
             foreach ($result['contents'] as $content) {
                 $list[] = $content;
             }
+
             return [
                 'code' => 200,
-                'msg' => 'ok',
+                'msg'  => 'ok',
                 'data' => [
                     'total' => $result['totalCount'],
-                    'list' => $list,
+                    'list'  => $list,
                 ],
             ];
         }
+
         return [
             'code' => 200,
-            'msg' => 'ok',
+            'msg'  => 'ok',
             'data' => [
                 'total' => 0,
-                'list' => [],
+                'list'  => [],
             ],
         ];
     }
 
     /**
      * 提醒事项.
+     *
      * @param $username
      */
     public function reminders($username, int $offset = 1, int $limit = 20): array
@@ -426,10 +456,10 @@ class Application
         $result = $this->request->postJson('v2/api/database/retrieve', [
             'json' => [
                 'username' => $username,
-                'params' => [
+                'params'   => [
                     'category' => 'REMINDER_SUMMARY',
-                    'offset' => ($offset - 1) * $limit,
-                    'limit' => $limit,
+                    'offset'   => ($offset - 1) * $limit,
+                    'limit'    => $limit,
                 ],
             ],
         ]);
@@ -438,21 +468,23 @@ class Application
             foreach ($result['contents'] as $content) {
                 $list[] = $content;
             }
+
             return [
                 'code' => 200,
-                'msg' => 'ok',
+                'msg'  => 'ok',
                 'data' => [
                     'total' => $result['totalCount'],
-                    'list' => $list,
+                    'list'  => $list,
                 ],
             ];
         }
+
         return [
             'code' => 200,
-            'msg' => 'ok',
+            'msg'  => 'ok',
             'data' => [
                 'total' => 0,
-                'list' => [],
+                'list'  => [],
             ],
         ];
     }

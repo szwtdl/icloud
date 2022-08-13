@@ -2,11 +2,14 @@
 
 declare(strict_types=1);
 /**
- * This file is part of szwtdl/icloud
+ * This file is part of szwtdl/icloud.
+ *
  * @link     https://www.szwtdl.cn
  * @contact  szpengjian@gmail.com
+ *
  * @license  https://github.com/szwtdl/icloud/blob/master/LICENSE
  */
+
 namespace Cloud;
 
 use GuzzleHttp\Client;
@@ -27,7 +30,9 @@ class HttpRequest
 
     /**
      * 发起请求
+     *
      * @throws \GuzzleHttp\Exception\GuzzleException
+     *
      * @return string
      */
     public function post(string $url, array $data)
