@@ -1,12 +1,16 @@
 <?php
 
 declare(strict_types=1);
-/**
- * This file is part of szwtdl/icloud
- * @link     https://www.szwtdl.cn
- * @contact  szpengjian@gmail.com
- * @license  https://github.com/szwtdl/icloud/blob/master/LICENSE
+
+/*
+ * This file is part of the szwtdl/icloud.
+ *
+ * (c) pengjian <szpengjian@gmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
  */
+
 namespace Cloud\Icloud;
 
 use Cloud\HttpRequest;
@@ -24,13 +28,14 @@ class Application
 
     /**
      * 账号登录.
+     *
      * @param $username
      * @param $password
      */
     public function login($username, $password): array
     {
         $result = $this->request->postJson('/v2/api/auth', ['json' => ['username' => $username, 'password' => $password]]);
-        if (isset($result['ec']) && $result['ec'] == '10000') {
+        if (isset($result['ec']) && '10000' == $result['ec']) {
             return [
                 'code' => 200,
                 'msg' => 'ok',
@@ -41,6 +46,7 @@ class Application
                 ],
             ];
         }
+
         return [
             'code' => 201,
             'msg' => 'fail',
@@ -50,6 +56,7 @@ class Application
 
     /**
      * 验证账号.
+     *
      * @param $username
      * @param $password
      * @param $code
@@ -63,7 +70,7 @@ class Application
                 'securityCode' => $code,
             ],
         ]);
-        if (isset($result['ec']) && $result['ec'] === 10001) {
+        if (isset($result['ec']) && 10001 === $result['ec']) {
             return [
                 'code' => 201,
                 'msg' => 'fail',
@@ -74,6 +81,7 @@ class Application
                 ],
             ];
         }
+
         return [
             'code' => 200,
             'msg' => 'ok',
@@ -87,6 +95,7 @@ class Application
 
     /**
      * 下载数据.
+     *
      * @param $username
      * @param $password
      */
@@ -98,13 +107,14 @@ class Application
                 'password' => $password,
             ],
         ]);
-        if (isset($result['status'], $result['ec']) && $result['ec'] == 200) {
+        if (isset($result['status'], $result['ec']) && 200 == $result['ec']) {
             return [
                 'code' => 200,
                 'msg' => 'ok',
                 'data' => $result['em'],
             ];
         }
+
         return [
             'code' => 201,
             'msg' => 'fail',
@@ -114,6 +124,7 @@ class Application
 
     /**
      * 重置session.
+     *
      * @param $username
      */
     public function reset($username): array
@@ -121,7 +132,7 @@ class Application
         $result = $this->request->postJson('v2/api/auth/reset', [
             'json' => ['username' => $username],
         ]);
-        if ($result['ec'] === 10001) {
+        if (10001 === $result['ec']) {
             return [
                 'code' => 201,
                 'msg' => 'fail',
@@ -132,6 +143,7 @@ class Application
                 ],
             ];
         }
+
         return [
             'code' => 200,
             'msg' => 'ok',
@@ -145,6 +157,7 @@ class Application
 
     /**
      * 账号设备列表.
+     *
      * @param $username
      */
     public function account($username): array
@@ -162,12 +175,14 @@ class Application
             foreach ($result['contents']['devices'] as $device) {
                 $list[] = $device;
             }
+
             return [
                 'code' => 200,
                 'msg' => 'ok',
                 'data' => $list,
             ];
         }
+
         return [
             'code' => 200,
             'msg' => 'ok',
@@ -177,6 +192,7 @@ class Application
 
     /**
      * 联系人列表.
+     *
      * @param $username
      */
     public function contact($username, int $offset = 1, int $limit = 20): array
@@ -201,6 +217,7 @@ class Application
                 ],
             ];
         }
+
         return [
             'code' => 200,
             'msg' => 'ok',
@@ -213,6 +230,7 @@ class Application
 
     /**
      * 定位列表.
+     *
      * @param $username
      */
     public function location($username, int $offset = 1, int $limit = 20): array
@@ -237,6 +255,7 @@ class Application
                 ],
             ];
         }
+
         return [
             'code' => 200,
             'msg' => 'ok',
@@ -249,6 +268,7 @@ class Application
 
     /**
      * 相册列表.
+     *
      * @param $username
      * @param $name
      */
@@ -270,6 +290,7 @@ class Application
             foreach ($result['contents'] as $content) {
                 $list[] = $content;
             }
+
             return [
                 'code' => 200,
                 'msg' => 'ok',
@@ -279,6 +300,7 @@ class Application
                 ],
             ];
         }
+
         return [
             'code' => 200,
             'msg' => 'ok',
@@ -291,6 +313,7 @@ class Application
 
     /**
      * 云盘数据.
+     *
      * @param $username
      */
     public function files($username, string $name = 'root'): array
@@ -326,6 +349,7 @@ class Application
                 ],
             ];
         }
+
         return [
             'code' => 200,
             'msg' => 'ok',
@@ -339,6 +363,7 @@ class Application
 
     /**
      * 日历列表.
+     *
      * @param $username
      */
     public function calendar($username, int $offset = 1, int $limit = 20): array
@@ -358,6 +383,7 @@ class Application
             foreach ($result['contents'] as $content) {
                 $list[] = $content;
             }
+
             return [
                 'code' => 200,
                 'msg' => 'ok',
@@ -367,6 +393,7 @@ class Application
                 ],
             ];
         }
+
         return [
             'code' => 200,
             'msg' => 'ok',
@@ -379,6 +406,7 @@ class Application
 
     /**
      * 事件列表.
+     *
      * @param $username
      */
     public function events($username, int $offset = 1, int $limit = 20): array
@@ -398,6 +426,7 @@ class Application
             foreach ($result['contents'] as $content) {
                 $list[] = $content;
             }
+
             return [
                 'code' => 200,
                 'msg' => 'ok',
@@ -407,6 +436,7 @@ class Application
                 ],
             ];
         }
+
         return [
             'code' => 200,
             'msg' => 'ok',
@@ -419,6 +449,7 @@ class Application
 
     /**
      * 提醒事项.
+     *
      * @param $username
      */
     public function reminders($username, int $offset = 1, int $limit = 20): array
@@ -438,6 +469,7 @@ class Application
             foreach ($result['contents'] as $content) {
                 $list[] = $content;
             }
+
             return [
                 'code' => 200,
                 'msg' => 'ok',
@@ -447,6 +479,7 @@ class Application
                 ],
             ];
         }
+
         return [
             'code' => 200,
             'msg' => 'ok',
