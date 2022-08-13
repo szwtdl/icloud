@@ -6,19 +6,23 @@
         "ext-json": "*",
         "guzzlehttp/guzzle": "^7.4"
     },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5",
+        "mockery/mockery": "^1.5"
+    },
     "license": "MIT",
     "autoload": {
         "psr-4": {
             "Cloud\\": "src/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Tests\\": "tests/"
         },
         "files": [
             "src/Helpers.php"
         ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
     },
     "authors": [
         {
