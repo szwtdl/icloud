@@ -4,19 +4,22 @@
     "type": "library",
     "require": {
         "ext-json": "*",
-        "php": "^7.3",
-        "guzzlehttp/guzzle": "7.4.*"
+        "guzzlehttp/guzzle": "^7.4",
+        "monolog/monolog": "^3.2"
     },
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Szwtdl\\Icloud\\": "src/"
+            "Cloud\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
             "Tests\\": "tests/"
-        }
+        },
+        "files": [
+            "src/Helpers.php"
+        ]
     },
     "authors": [
         {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Szwtdl\Icloud\Exceptions;
+namespace Cloud\Exceptions;
 
 class HttpException extends \Exception
 {
