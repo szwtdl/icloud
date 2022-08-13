@@ -323,7 +323,7 @@ class Application
                         'name' => $result['contents']['name'],
                         'parentId' => $result['contents']['parentId'],
                         'type' => strtolower($result['contents']['type']),
-                        'size' => $result['contents']['assetQuota'],
+                        'size' => format_size($result['contents']['assetQuota']),
                         'create_time' => $result['contents']['dateCreated'],
                         'modified_time' => $result['contents']['dateModified'],
                         'changed_time' => $result['contents']['dateChanged'],
