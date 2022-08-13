@@ -321,7 +321,7 @@ class Application
                     'folder' => [
                         'id' => $result['contents']['docwsid'],
                         'name' => $result['contents']['name'],
-                        'parentId' => $result['contents']['parentId'],
+                        'parentId' => str_replace('FOLDER::com.apple.CloudDocs::', '', $result['contents']['parentId']),
                         'type' => strtolower($result['contents']['type']),
                         'size' => format_size($result['contents']['assetQuota']),
                         'create_time' => $result['contents']['dateCreated'],
