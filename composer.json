@@ -26,5 +26,12 @@
             "email": "szpengjian@gmail.com"
         }
     ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Cloud\\ServiceProvider"
+            ]
+        }
+    },
     "minimum-stability": "stable"
 }
