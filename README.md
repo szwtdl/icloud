@@ -1,5 +1,11 @@
 # Apple icloud sdk
 
+[![Latest Stable Version](https://poser.pugx.org/szwtdl/icloud/v/stable)](https://packagist.org/packages/szwtdl/icloud)
+[![Total Downloads](https://poser.pugx.org/szwtdl/icloud/downloads)](https://packagist.org/packages/szwtdl/icloud)
+[![Latest Unstable Version](https://poser.pugx.org/szwtdl/icloud/v/unstable)](https://packagist.org/packages/szwtdl/icloud)
+[![License](https://poser.pugx.org/szwtdl/icloud/license)](https://packagist.org/packages/szwtdl/icloud)
+[![Monthly Downloads](https://poser.pugx.org/szwtdl/icloud/d/monthly)](https://packagist.org/packages/szwtdl/icloud)
+
 ### Cloud
 
 ```bash
