@@ -7,7 +7,7 @@ declare(strict_types=1);
  * @contact  szpengjian@gmail.com
  * @license  https://github.com/szwtdl/icloud/blob/master/LICENSE
  */
-if (! function_exists('dd')) {
+if (!function_exists('dd')) {
     /**
      * print.
      * @param $arr
@@ -20,7 +20,34 @@ if (! function_exists('dd')) {
     }
 }
 
-if (! function_exists('format_size')) {
+if (!function_exists('getEscape')) {
+    function getEscape($filename)
+    {
+        if (empty($filename)) return '';
+        $dirname = dirname($filename);
+        $filename = basename($filename);
+        $arr = [
+            '#' => '%23',
+        ];
+        foreach ($arr as $key => $item) {
+            $filename = str_replace($key, $item, $filename);
+        }
+        return str_replace('\\', '/', $dirname . DIRECTORY_SEPARATOR . $filename);
+    }
+}
+
+if (!function_exists('getExtension')) {
+    function getExtension(string $name): string
+    {
+        $extensions = ['zip', 'xlsx', 'xls', 'wps', 'txt', 'tif', 'tar', 'swf', 'rp', 'rm', 'rar', 'psd', 'psb', 'ppt', 'png', 'pdf', 'mp4', 'mp3', 'mov', 'keynote', 'jpg', 'jpeg', 'html', 'gif', 'folder', 'flv', 'ext', 'eps', 'docx', 'doc', 'csv', 'bmp', 'avi', 'ai', '7z'];
+        if (in_array(\strtolower($name), $extensions)) {
+            return $name;
+        } else {
+            return 'empty';
+        }
+    }
+}
+if (!function_exists('format_size')) {
     function format_size($file_size)
     {
         $file_size = $file_size - 1;

@@ -7,8 +7,10 @@ declare(strict_types=1);
  * @contact  szpengjian@gmail.com
  * @license  https://github.com/szwtdl/icloud/blob/master/LICENSE
  */
+
 namespace Cloud;
 
+use Cloud\Exceptions\HttpException;
 use GuzzleHttp\Client;
 
 class HttpRequest
@@ -27,16 +29,24 @@ class HttpRequest
 
     /**
      * 发起请求
-     * @throws \GuzzleHttp\Exception\GuzzleException
      * @return string
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function post(string $url, array $data)
     {
-        return $this->client->request('POST', $url, $data)->getBody()->getContents();
+        try {
+            return $this->client->request('POST', $url, $data)->getBody()->getContents();
+        } catch (\Exception $exception) {
+            throw new HttpException($exception->getMessage());
+        }
     }
 
     public function postJson(string $url, array $data)
     {
-        return json_decode($this->client->request('POST', $url, $data)->getBody()->getContents(), true);
+        try {
+            return json_decode($this->client->request('POST', $url, $data)->getBody()->getContents(), true);
+        } catch (\Exception $exception) {
+            throw new HttpException($exception->getMessage());
+        }
     }
 }
