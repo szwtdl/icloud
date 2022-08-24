@@ -7,7 +7,6 @@ declare(strict_types=1);
  * @contact  szpengjian@gmail.com
  * @license  https://github.com/szwtdl/icloud/blob/master/LICENSE
  */
-
 namespace Cloud\Icloud;
 
 use Carbon\Carbon;
@@ -202,12 +201,12 @@ class Application
                 if ($item['phones'] === null) {
                     continue;
                 }
-                //通话记录
+                // 通话记录
                 if (empty($item['firstName']) && empty($item['lastName']) && is_array($item['phones'][0])) {
                     $item['nickName'] = $item['companyName'];
                     $item['firstName'] = $item['companyName'];
                 }
-                if (!empty($item['phones']) && empty($item['firstName']) && empty($item['lastName']) && empty($item['companyName'])) {
+                if (! empty($item['phones']) && empty($item['firstName']) && empty($item['lastName']) && empty($item['companyName'])) {
                     $tmp = $item['phones'][0];
                     $item['firstName'] = $tmp['field'];
                     $item['companyName'] = $tmp['field'];
@@ -327,21 +326,21 @@ class Application
             foreach ($result['contents'] as $content) {
                 $list[] = [
                     'id' => md5($content['id']),
-                    'filename' => str_replace("./", '', getEscape($content['filename'])),
+                    'filename' => str_replace('./', '', getEscape($content['filename'])),
                     'created' => (new Carbon())->create($content['created'])->toDateTimeString(),
                     'type' => empty($content['heif2jpg']['type']) ? strtolower($content['original']['type']) : strtolower($content['heif2jpg']['type']),
                     'original' => array_merge($content['original'], [
-                        'url' => getEscape($content['original']['url'])
+                        'url' => getEscape($content['original']['url']),
                     ]),
                     'medium' => array_merge($content['medium'], [
-                        'url' => getEscape($content['medium']['url'])
+                        'url' => getEscape($content['medium']['url']),
                     ]),
                     'thumb' => array_merge($content['thumb'], [
-                        'url' => getEscape($content['thumb']['url'])
+                        'url' => getEscape($content['thumb']['url']),
                     ]),
                     'heif2jpg' => array_merge($content['heif2jpg'], [
-                        'url' => getEscape($content['heif2jpg']['url'])
-                    ])
+                        'url' => getEscape($content['heif2jpg']['url']),
+                    ]),
                 ];
             }
             return [
@@ -393,7 +392,7 @@ class Application
                     'changed_time' => $result['contents']['dateChanged'],
                     'last_open_time' => $result['contents']['lastOpenTime'],
                     'child_num' => $result['contents']['numberOfItems'],
-                ]
+                ],
             ];
             if (isset($result['contents']['items']) && count($result['contents']['items']) > 0) {
                 foreach ($result['contents']['items'] as $key => $child) {
@@ -415,7 +414,7 @@ class Application
                             'modify_time' => (new Carbon())->create($child['dateModified'])->toDateTimeString(),
                             'update_time' => (new Carbon())->create($child['dateChanged'])->toDateTimeString(),
                             'last_time' => (new Carbon())->create($child['lastOpenTime'])->toDateTimeString(),
-                            'url' => empty($child['url']) ? '' : $child['url']
+                            'url' => empty($child['url']) ? '' : $child['url'],
                         ];
                     } else {
                         $data['list'][$key] = [
@@ -438,7 +437,7 @@ class Application
             return [
                 'code' => 200,
                 'msg' => 'ok',
-                'data' => $data
+                'data' => $data,
             ];
         }
         return [
@@ -482,7 +481,7 @@ class Application
                     'enabled' => $content['enabled'],
                     'url' => empty($content['prePublishedUrl']) ? '' : $content['prePublishedUrl'],
                     'create_time' => (new Carbon())->create($content['createdDate'][1] . '-' . $content['createdDate'][2] . '-' . $content['createdDate'][3] . ' ' . $content['createdDate'][4] . ':' . $content['createdDate'][5] . ':00')->toDateTimeString(),
-                    'modify_time' => (new Carbon())->create($content['lastModifiedDate'][1] . '-' . $content['lastModifiedDate'][2] . '-' . $content['lastModifiedDate'][3] . ' ' . $content['lastModifiedDate'][4] . ':' . $content['lastModifiedDate'][5] . ':00')->toDateTimeString()
+                    'modify_time' => (new Carbon())->create($content['lastModifiedDate'][1] . '-' . $content['lastModifiedDate'][2] . '-' . $content['lastModifiedDate'][3] . ' ' . $content['lastModifiedDate'][4] . ':' . $content['lastModifiedDate'][5] . ':00')->toDateTimeString(),
                 ];
             }
             return [
@@ -583,13 +582,10 @@ class Application
     }
 
     /**
-     * 提醒事项详情
+     * 提醒事项详情.
      * @param $username
-     * @param string $guid
-     * @param int $offset
-     * @param int $limit
-     * @return array
      * @throws \Cloud\Exceptions\HttpException
+     * @return array
      */
     public function reminder($username, string $guid = 'root', int $offset = 1, int $limit = 20)
     {
@@ -600,7 +596,7 @@ class Application
                     'category' => 'REMINDER_DETAIL',
                     'offset' => ($offset - 1) * $limit,
                     'limit' => $limit,
-                    'rid' => $guid
+                    'rid' => $guid,
                 ],
             ],
         ]);

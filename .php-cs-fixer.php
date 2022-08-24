@@ -81,9 +81,6 @@ return (new PhpCsFixer\Config())
     ])
     ->setFinder(
         PhpCsFixer\Finder::create()
-            ->exclude('public')
-            ->exclude('runtime')
-            ->exclude('vendor')
             ->in(__DIR__)
     )
     ->setUsingCache(false);
