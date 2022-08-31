@@ -545,6 +545,50 @@ class Application
     }
 
     /**
+     * Notes
+     * @param $username
+     * @param int $offset
+     * @param int $limit
+     * @return array
+     * @throws \Cloud\Exceptions\HttpException
+     */
+    public function notes($username, int $offset = 1, int $limit = 20)
+    {
+        $result = $this->request->postJson('v2/api/database/retrieve', [
+            'json' => [
+                'username' => $username,
+                'params' => [
+                    'category' => 'NOTE',
+                    'offset' => ($offset - 1) * $limit,
+                    'limit' => $limit,
+                ],
+            ],
+        ]);
+        if (isset($result['contents']) && is_array($result['contents'])) {
+            $list = [];
+            foreach ($result['contents'] as $content) {
+                $list[] = $content;
+            }
+            return [
+                'code' => 200,
+                'msg' => 'ok',
+                'data' => [
+                    'total' => $result['totalCount'],
+                    'list' => $list,
+                ],
+            ];
+        }
+        return [
+            'code' => 200,
+            'msg' => 'ok',
+            'data' => [
+                'total' => 0,
+                'list' => [],
+            ],
+        ];
+    }
+
+    /**
      * 提醒事项.
      * @param $username
      */
