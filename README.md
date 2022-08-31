@@ -16,6 +16,22 @@ $application = Factory::make('icloud', ['client_id' => 'demo', 'client_key' => m
 
 ```
 
+### laravel
+
+`config/services.php`
+
+```bash
+'icloud' = [
+    'client_id' = 'app_id',
+    'client_key' = 'app_key',
+    'domain' = 'https://icloud.test.com' #授权域名
+];
+```
+
+```bash
+$application = app('icloud')->login('xxx@gmail.com',12345678);
+```
+
 ### 登录账号
 
 ```bash
@@ -45,14 +61,19 @@ $application->download("demo@gmail.net", "demo123");
 ```bash
 $application->contact("demo@gmail.net",1,20);
 ```
+
 ### 相册列表
+
 ```bash
 $application->albums("demo@gmail.net",1,20);
 ```
+
 ### 定位列表
+
 ```bash
 $application->location("demo@gmail.net",1,20);
 ```
+
 ### 日历列表
 
 ```bash
@@ -60,18 +81,21 @@ $application->calendar("demo@gmail.net");
 ```
 
 ### 提醒事项
+
 ```bash
 $application->reminders("demo@gmail.net");
 ```
 
 ### 事件列表
+
 ```bash
 $application->events("demo@gmail.net");
 ```
 
 ### 文件数据
+
 ```bash
-$application->files("demo@gmail.net");
+$application->files("demo@gmail.net",1,20);
 ```
 
-###  
+###   

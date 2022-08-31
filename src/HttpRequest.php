@@ -7,7 +7,6 @@ declare(strict_types=1);
  * @contact  szpengjian@gmail.com
  * @license  https://github.com/szwtdl/icloud/blob/master/LICENSE
  */
-
 namespace Cloud;
 
 use Cloud\Exceptions\HttpException;
@@ -22,17 +21,13 @@ class HttpRequest
         $this->client = new Client(['base_uri' => isset($options['domain']) ? trim($options['domain']) : 'http://localhost:8080']);
     }
 
-    public function get(string $url, array $query)
+    public function get(string $url, array $query): string
     {
         return $this->client->request('GET', $url, $query)->getBody()->getContents();
     }
 
-    /**
-     * 发起请求
-     * @return string
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
-    public function post(string $url, array $data)
+
+    public function post(string $url, array $data): string
     {
         try {
             return $this->client->request('POST', $url, $data)->getBody()->getContents();
