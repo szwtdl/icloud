@@ -545,7 +545,6 @@ class Application
     }
 
     /**
-     * Notes
      * @param $username
      * @param int $offset
      * @param int $limit
@@ -567,6 +566,8 @@ class Application
         if (isset($result['contents']) && is_array($result['contents'])) {
             $list = [];
             foreach ($result['contents'] as $content) {
+                $content['created'] = empty($content['created']) ? (new Carbon())->toDateTimeString() : (new Carbon())->create(date('Y-m-d H:i:s',intval($content['created'] / 1000)))->toDateTimeString();
+                $content['modified'] = empty($content['modified']) ? (new Carbon())->toDateTimeString() :  (new Carbon())->create(date('Y-m-d H:i:s',intval($content['modified'] / 1000)))->toDateTimeString();
                 $list[] = $content;
             }
             return [
