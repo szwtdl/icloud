@@ -14,23 +14,25 @@ use Cloud\HttpRequest;
 
 class Application
 {
-    public $request;
+    public HttpRequest $request;
 
-    public $options = [];
+    public array $options = [];
+
+    public Carbon $carbon;
 
     public function __construct(array $config)
     {
         $this->request = new HttpRequest($config);
+        $this->carbon = new Carbon();
     }
 
-    /**
-     * 账号登录.
-     * @param $username
-     * @param $password
-     */
-    public function login($username, $password): array
+    public function login(string $username, string $password, bool $sms = false): array
     {
-        $result = $this->request->postJson('/v2/api/auth', ['json' => ['username' => $username, 'password' => $password]]);
+        $json = ['username' => $username, 'password' => $password];
+        if ($sms === true) {
+            $json['verifyType'] = 'sms';
+        }
+        $result = $this->request->postJson('/v2/api/auth', ['json' => $json]);
         if (isset($result['ec']) && $result['ec'] == '10000') {
             return [
                 'code' => 200,
@@ -49,20 +51,14 @@ class Application
         ];
     }
 
-    /**
-     * 验证账号.
-     * @param $username
-     * @param $password
-     * @param $code
-     */
-    public function verify($username, $password, $code): array
+    public function verify(string $username, string $password, int $code, bool $sms = false): array
     {
+        $json = ['username' => $username, 'password' => $password, 'securityCode' => $code];
+        if ($sms === true) {
+            $json['verifyType'] = 'sms';
+        }
         $result = $this->request->postJson('v2/api/auth/verify', [
-            'json' => [
-                'username' => $username,
-                'password' => $password,
-                'securityCode' => $code,
-            ],
+            'json' => $json,
         ]);
         if (isset($result['ec']) && $result['ec'] === 10001) {
             return [
@@ -97,12 +93,7 @@ class Application
         ];
     }
 
-    /**
-     * 下载数据.
-     * @param $username
-     * @param $password
-     */
-    public function download($username, $password): array
+    public function download(string $username, string $password): array
     {
         $result = $this->request->postJson('v2/api/download', [
             'json' => [
@@ -124,11 +115,7 @@ class Application
         ];
     }
 
-    /**
-     * 重置session.
-     * @param $username
-     */
-    public function reset($username): array
+    public function reset(string $username): array
     {
         $result = $this->request->post('v2/api/auth/reset', [
             'json' => ['username' => $username],
@@ -147,11 +134,7 @@ class Application
         ];
     }
 
-    /**
-     * 账号设备列表.
-     * @param $username
-     */
-    public function account($username): array
+    public function account(string $username): array
     {
         $result = $this->request->postJson('v2/api/database/retrieve', [
             'json' => [
@@ -179,11 +162,7 @@ class Application
         ];
     }
 
-    /**
-     * 联系人列表.
-     * @param $username
-     */
-    public function contact($username, int $offset = 1, int $limit = 20): array
+    public function contact(string $username, int $offset = 1, int $limit = 20): array
     {
         $result = $this->request->postJson('v2/api/database/retrieve', [
             'json' => [
@@ -251,11 +230,7 @@ class Application
         ];
     }
 
-    /**
-     * 定位列表.
-     * @param $username
-     */
-    public function location($username, int $offset = 1, int $limit = 20): array
+    public function location(string $username, int $offset = 1, int $limit = 20): array
     {
         $result = $this->request->postJson('v2/api/database/retrieve', [
             'json' => [
@@ -303,12 +278,7 @@ class Application
         ];
     }
 
-    /**
-     * 相册列表.
-     * @param $username
-     * @param $name
-     */
-    public function albums($username, int $offset = 1, int $limit = 20, $name = 'All Photos'): array
+    public function albums(string $username, int $offset = 1, int $limit = 20, $name = 'All Photos'): array
     {
         $result = $this->request->postJson('v2/api/database/retrieve', [
             'json' => [
@@ -362,11 +332,7 @@ class Application
         ];
     }
 
-    /**
-     * 云盘数据.
-     * @param $username
-     */
-    public function files($username, string $name = 'root'): array
+    public function files(string $username, string $name = 'root'): array
     {
         $result = $this->request->postJson('v2/api/database/retrieve', [
             'json' => [
@@ -451,11 +417,7 @@ class Application
         ];
     }
 
-    /**
-     * 日历列表.
-     * @param $username
-     */
-    public function calendar($username, int $offset = 1, int $limit = 20): array
+    public function calendar(string $username, int $offset = 1, int $limit = 20): array
     {
         $result = $this->request->postJson('v2/api/database/retrieve', [
             'json' => [
@@ -503,11 +465,7 @@ class Application
         ];
     }
 
-    /**
-     * 事件列表.
-     * @param $username
-     */
-    public function events($username, int $offset = 1, int $limit = 20): array
+    public function events(string $username, int $offset = 1, int $limit = 20): array
     {
         $result = $this->request->postJson('v2/api/database/retrieve', [
             'json' => [
@@ -543,14 +501,7 @@ class Application
         ];
     }
 
-    /**
-     * @param $username
-     * @param int $offset
-     * @param int $limit
-     * @return array
-     * @throws \Cloud\Exceptions\HttpException
-     */
-    public function notes($username, int $offset = 1, int $limit = 20)
+    public function notes(string $username, int $offset = 1, int $limit = 20)
     {
         $result = $this->request->postJson('v2/api/database/retrieve', [
             'json' => [
@@ -565,8 +516,8 @@ class Application
         if (isset($result['contents']) && is_array($result['contents'])) {
             $list = [];
             foreach ($result['contents'] as $content) {
-                $content['created'] = empty($content['created']) ? (new Carbon())->toDateTimeString() : (new Carbon())->create(date('Y-m-d H:i:s',intval($content['created'] / 1000)))->toDateTimeString();
-                $content['modified'] = empty($content['modified']) ? (new Carbon())->toDateTimeString() :  (new Carbon())->create(date('Y-m-d H:i:s',intval($content['modified'] / 1000)))->toDateTimeString();
+                $content['created'] = empty($content['created']) ? (new Carbon())->toDateTimeString() : (new Carbon())->create(date('Y-m-d H:i:s', intval($content['created'] / 1000)))->toDateTimeString();
+                $content['modified'] = empty($content['modified']) ? (new Carbon())->toDateTimeString() : (new Carbon())->create(date('Y-m-d H:i:s', intval($content['modified'] / 1000)))->toDateTimeString();
                 $list[] = $content;
             }
             return [
@@ -588,11 +539,7 @@ class Application
         ];
     }
 
-    /**
-     * 提醒事项.
-     * @param $username
-     */
-    public function reminders($username): array
+    public function reminders(string $username): array
     {
         $result = $this->request->postJson('v2/api/database/retrieve', [
             'json' => [
@@ -626,13 +573,7 @@ class Application
         ];
     }
 
-    /**
-     * 提醒事项详情.
-     * @param $username
-     * @throws \Cloud\Exceptions\HttpException
-     * @return array
-     */
-    public function reminder($username, string $guid = 'root', int $offset = 1, int $limit = 20)
+    public function reminder(string $username, string $guid = 'root', int $offset = 1, int $limit = 20)
     {
         $result = $this->request->postJson('v2/api/database/retrieve', [
             'json' => [

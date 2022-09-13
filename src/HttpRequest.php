@@ -14,7 +14,7 @@ use GuzzleHttp\Client;
 
 class HttpRequest
 {
-    public $client;
+    public Client $client;
 
     public function __construct(array $options)
     {

@@ -9,6 +9,7 @@ declare(strict_types=1);
  */
 namespace Cloud;
 
+
 class Factory
 {
     public static function __callStatic($name, $arguments)
