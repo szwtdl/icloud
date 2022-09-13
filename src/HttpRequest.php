@@ -26,7 +26,6 @@ class HttpRequest
         return $this->client->request('GET', $url, $query)->getBody()->getContents();
     }
 
-
     public function post(string $url, array $data): string
     {
         try {

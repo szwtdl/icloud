@@ -117,20 +117,20 @@ class Application
 
     public function reset(string $username): array
     {
-        $result = $this->request->post('v2/api/auth/reset', [
+        $result = $this->request->postJson('v2/api/auth/reset', [
             'json' => ['username' => $username],
         ]);
-        if ($result != 'Task done.') {
+        if (isset($result['ec']) && $result['ec'] === 200) {
             return [
-                'code' => 201,
-                'msg' => 'fail',
+                'code' => 200,
+                'msg' => 'ok',
                 'data' => $result,
             ];
         }
         return [
-            'code' => 200,
-            'msg' => 'ok',
-            'data' => '',
+            'code' => 201,
+            'msg' => 'fail',
+            'data' => $result,
         ];
     }
 
