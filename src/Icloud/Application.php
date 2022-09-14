@@ -26,71 +26,97 @@ class Application
         $this->carbon = new Carbon();
     }
 
-    public function login(string $username, string $password, bool $sms = false): array
+    public function login(string $username, string $password, int $device_id = 0): array
     {
         $json = ['username' => $username, 'password' => $password];
-        if ($sms === true) {
+        if ($device_id !== 0) {
             $json['verifyType'] = 'sms';
+            $json['deviceid'] = (string) $device_id;
         }
         $result = $this->request->postJson('/v2/api/auth', ['json' => $json]);
-        if (isset($result['ec']) && $result['ec'] == '10000') {
-            return [
-                'code' => 200,
-                'msg' => 'ok',
-                'data' => [
-                    'status' => $result['status'],
-                    'code' => $result['ec'],
-                    'msg' => $result['em'],
-                ],
-            ];
+        if (isset($result['status'], $result['ec'], $result['em'])) {
+            $response = [];
+            switch ($result['ec']) {
+                case 10000:
+                    $response = [
+                        'code' => 200,
+                        'msg' => $result['em'],
+                        'data' => $this->getPhones($username, $password),
+                    ];
+                    break;
+                case 10003:
+                    $response = [
+                        'code' => 201,
+                        'msg' => $result['em'],
+                        'data' => $result,
+                    ];
+                    break;
+                case 10004:
+                    $response = [
+                        'code' => 202,
+                        'msg' => $result['em'],
+                        'phones' => $this->getPhones($username, $password),
+                    ];
+                    break;
+            }
+            return $response;
         }
-        return [
-            'code' => 201,
-            'msg' => 'fail',
-            'data' => $result,
-        ];
     }
 
-    public function verify(string $username, string $password, int $code, bool $sms = false): array
+    public function getPhones(string $username, string $password): array
     {
-        $json = ['username' => $username, 'password' => $password, 'securityCode' => $code];
-        if ($sms === true) {
+        $array = [];
+        $result = $this->request->postJson('/v2/api/auth/trustedphones', ['json' => ['username' => $username, 'password' => $password]]);
+        if (isset($result['status'], $result['ec'], $result['em'])) {
+            return $array;
+        }
+        foreach ($result as $item) {
+            $array[] = [
+                'id' => $item['id'] ?? '',
+                'phone' => $item['numberWithDialCode'] ?? '',
+                'last' => $item['lastTwoDigits'] ?? '',
+            ];
+        }
+        return $array;
+    }
+
+    public function verify(string $username, string $password, int $code, int $device_id = 0): array
+    {
+        $json = ['username' => $username, 'password' => $password, 'securityCode' => (string) $code];
+        if ($device_id !== 0) {
             $json['verifyType'] = 'sms';
+            $json['deviceid'] = (string) $device_id;
         }
         $result = $this->request->postJson('v2/api/auth/verify', [
             'json' => $json,
         ]);
-        if (isset($result['ec']) && $result['ec'] === 10001) {
-            return [
-                'code' => 201,
-                'msg' => 'fail',
-                'data' => [
-                    'status' => $result['status'],
-                    'code' => $result['ec'],
-                    'msg' => $result['em'],
-                ],
-            ];
+        if (isset($result['status'], $result['ec'], $result['em'])) {
+            switch ($result['ec']) {
+                case 10004:
+                case 10001:
+                    return [
+                        'code' => 202,
+                        'msg' => $result['status'],
+                        'data' => [
+                            'status' => $result['status'],
+                            'code' => $result['ec'],
+                            'msg' => $result['em'],
+                        ],
+                    ];
+                    break;
+                case 10000:
+                    return [
+                        'code' => 200,
+                        'msg' => 'ok',
+                        'data' => [
+                            'status' => $result['status'],
+                            'code' => $result['ec'],
+                            'msg' => $result['em'],
+                        ],
+                    ];
+                    break;
+            }
         }
-        if (isset($result['ec']) && $result['ec'] == 10004) {
-            return [
-                'code' => 201,
-                'msg' => 'fail',
-                'data' => [
-                    'status' => $result['status'],
-                    'code' => $result['ec'],
-                    'msg' => $result['em'],
-                ],
-            ];
-        }
-        return [
-            'code' => 200,
-            'msg' => 'ok',
-            'data' => [
-                'status' => $result['status'],
-                'code' => $result['ec'],
-                'msg' => $result['em'],
-            ],
-        ];
     }
 
     public function download(string $username, string $password): array
@@ -101,7 +127,7 @@ class Application
                 'password' => $password,
             ],
         ]);
-        if (isset($result['status'], $result['ec']) && $result['ec'] == 200) {
+        if (isset($result['status'], $result['ec']) && $result['ec'] === 200) {
             return [
                 'code' => 200,
                 'msg' => 'ok',

@@ -16,6 +16,25 @@ if (! function_exists('dd')) {
     }
 }
 
+if (! function_exists('analyzePhones')) {
+    function analyzePhones(string $text): array
+    {
+        $crawler = new \Symfony\Component\DomCrawler\Crawler($text);
+        $text = $crawler->filterXPath('//script[7]')->html();
+        $text = json_decode($text, true);
+        $phoneInfo = $text['direct']['twoSV']['phoneNumberVerification']['trustedPhoneNumbers'];
+        $result = [];
+        foreach ($phoneInfo as $value) {
+            $result[] = [
+                'id' => $value['id'],
+                'last' => $value['lastTwoDigits'],
+                'value' => html_entity_decode($value['numberWithDialCode']),
+            ];
+        }
+        return $result;
+    }
+}
+
 if (! function_exists('getEscape')) {
     function getEscape($filename)
     {

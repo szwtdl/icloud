@@ -21,7 +21,9 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
             return Factory::make('icloud', [
                 'client_id' => config('services.icloud.client_id'),
                 'client_key' => config('services.icloud.client_key'),
-                'domain' => config('services.icloud.domain'),
+                'options' => [
+                    'base_uri' => config('services.icloud.domain'),
+                ],
             ]);
         });
         $this->app->alias(Application::class, 'icloud');
