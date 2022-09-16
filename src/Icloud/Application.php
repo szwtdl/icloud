@@ -41,7 +41,7 @@ class Application
                     $response = [
                         'code' => 200,
                         'msg' => $result['em'],
-                        'data' => $this->getPhones($username, $password),
+                        'data' => $result['em'],
                     ];
                     break;
                 case 10003:
