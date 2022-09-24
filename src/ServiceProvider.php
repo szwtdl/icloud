@@ -7,9 +7,10 @@ declare(strict_types=1);
  * @contact  szpengjian@gmail.com
  * @license  https://github.com/szwtdl/icloud/blob/master/LICENSE
  */
+
 namespace Cloud;
 
-use Cloud\Icloud\Application;
+use Cloud\Application;
 
 class ServiceProvider extends \Illuminate\Support\ServiceProvider
 {
@@ -18,7 +19,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
     public function register()
     {
         $this->app->singleton(Application::class, function () {
-            return Factory::make('icloud', [
+            return new Application([
                 'client_id' => config('services.icloud.client_id'),
                 'client_key' => config('services.icloud.client_key'),
                 'options' => [

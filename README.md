@@ -1,4 +1,4 @@
-# Apple icloud sdk
+# Apple icloud sdk v2
 
 [![Build Status](https://github.com/szwtdl/icloud/actions/workflows/test.yml/badge.svg)](https://github.com/szwtdl/icloud/actions)
 [![Latest Stable Version](https://poser.pugx.org/szwtdl/icloud/v/stable)](https://packagist.org/packages/szwtdl/icloud)
@@ -7,12 +7,18 @@
 [![License](https://poser.pugx.org/szwtdl/icloud/license)](https://packagist.org/packages/szwtdl/icloud)
 [![Monthly Downloads](https://poser.pugx.org/szwtdl/icloud/d/monthly)](https://packagist.org/packages/szwtdl/icloud)
 
-### Cloud
+### Cloud v2 版本和v1版本没法共同使用
 
 ```bash
-use Cloud\Factory;
-
-$application = Factory::make('icloud', ['client_id' => 'demo', 'client_key' => md5('demo'), 'domain' => 'http://localhost:8080']);
+use Cloud\Application;
+$options = [
+    'client_id' => 'demo',
+    'client_key' => md5('demo'),
+    'options' => [
+        'base_uri' => 'http://localhost:8080',
+    ],
+];
+$application = new Application($options);
 
 ```
 
@@ -35,13 +41,19 @@ $application = app('icloud')->login('xxx@gmail.com',12345678);
 ### 登录账号
 
 ```bash
-$application->login("demo@gmail.net", "demo123")
+$application->login("demo@gmail.net", "demo123","device_id")
 ```
 
 ### 二步验证
 
 ```bash
-$application->verify("demo@gmail.net", "demo123","888888");
+$application->verify("demo@gmail.net", "demo123","888888","device_id");
+```
+
+### 下载数据
+
+```bash
+$application->download("demo@gmail.net", "demo123");
 ```
 
 ### 重置session
@@ -50,10 +62,10 @@ $application->verify("demo@gmail.net", "demo123","888888");
 $application->reset("demo@gmail.net");
 ```
 
-### 下载数据
+### 账号数据
 
-```bash
-$application->download("demo@gmail.net", "demo123");
+```bash 
+$application->account("demo@gmail.net");
 ```
 
 ### 联系人
@@ -66,6 +78,12 @@ $application->contact("demo@gmail.net",1,20);
 
 ```bash
 $application->albums("demo@gmail.net",1,20);
+```
+
+### 文件数据
+
+```bash
+$application->files("demo@gmail.net",1,20);
 ```
 
 ### 定位列表
@@ -86,16 +104,20 @@ $application->calendar("demo@gmail.net");
 $application->reminders("demo@gmail.net");
 ```
 
-### 事件列表
+### 备注
 
-```bash
-$application->events("demo@gmail.net");
+```bash 
+$application->reminders("demo@gmail.net");
 ```
 
-### 文件数据
+### 短信列表
 
-```bash
-$application->files("demo@gmail.net",1,20);
+```bash 
+$application->TextMessages("demo@gmail.net");
 ```
 
-###   
+### 单个用户的短信列表
+
+```bash 
+$application->TextMessage($username, '+447563696391');
+```

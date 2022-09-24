@@ -15,7 +15,6 @@ if (! function_exists('dd')) {
         exit;
     }
 }
-
 if (! function_exists('analyzePhones')) {
     function analyzePhones(string $text): array
     {
@@ -67,6 +66,7 @@ if (! function_exists('format_size')) {
     function format_size($file_size): string
     {
         $file_size = $file_size - 1;
+        $show_filesize = '0 b';
         if ($file_size >= 1099511627776) {
             $show_filesize = number_format($file_size / 1099511627776, 2) . ' TB';
         } elseif ($file_size >= 1073741824) {
@@ -77,8 +77,6 @@ if (! function_exists('format_size')) {
             $show_filesize = number_format($file_size / 1024, 2) . ' KB';
         } elseif ($file_size > 0) {
             $show_filesize = $file_size . ' b';
-        } elseif ($file_size == 0 || $file_size == -1) {
-            $show_filesize = '0 b';
         }
         return $show_filesize;
     }

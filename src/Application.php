@@ -7,26 +7,33 @@ declare(strict_types=1);
  * @contact  szpengjian@gmail.com
  * @license  https://github.com/szwtdl/icloud/blob/master/LICENSE
  */
-namespace Cloud\Icloud;
+namespace Cloud;
 
 use Carbon\Carbon;
-use Cloud\HttpRequest;
 
 class Application
 {
+    public const SUCCESS = 200;
+
+    public const ERROR = 201;
+
+    public const SUCCESS_MSG = 'ok';
+
+    public const ERROR_MSG = 'fail';
+
     public HttpRequest $request;
 
-    public array $options = [];
+    public Carbon $now;
 
-    public Carbon $carbon;
+    public array $options = [];
 
     public function __construct(array $config)
     {
         $this->request = new HttpRequest($config);
-        $this->carbon = new Carbon();
+        $this->now = new Carbon();
     }
 
-    public function login(string $username, string $password, int $device_id = 0): array
+    public function login(string $username, string $password, int $device_id = 0)
     {
         $json = ['username' => $username, 'password' => $password];
         if ($device_id !== 0) {
@@ -39,14 +46,14 @@ class Application
             switch ($result['ec']) {
                 case 10000:
                     $response = [
-                        'code' => 200,
+                        'code' => self::SUCCESS,
                         'msg' => $result['em'],
                         'data' => $result['em'],
                     ];
                     break;
                 case 10003:
                     $response = [
-                        'code' => 201,
+                        'code' => self::ERROR,
                         'msg' => $result['em'],
                         'data' => $result,
                     ];
@@ -55,7 +62,7 @@ class Application
                     $response = [
                         'code' => 202,
                         'msg' => $result['em'],
-                        'phones' => $this->getPhones($username, $password),
+                        'phones' => $this->phones($username, $password),
                     ];
                     break;
             }
@@ -63,33 +70,14 @@ class Application
         }
     }
 
-    public function getPhones(string $username, string $password): array
-    {
-        $array = [];
-        $result = $this->request->postJson('/v2/api/auth/trustedphones', ['json' => ['username' => $username, 'password' => $password]]);
-        if (isset($result['status'], $result['ec'], $result['em'])) {
-            return $array;
-        }
-        foreach ($result as $item) {
-            $array[] = [
-                'id' => $item['id'] ?? '',
-                'phone' => $item['numberWithDialCode'] ?? '',
-                'last' => $item['lastTwoDigits'] ?? '',
-            ];
-        }
-        return $array;
-    }
-
-    public function verify(string $username, string $password, int $code, int $device_id = 0): array
+    public function verify(string $username, string $password, string $code, int $device_id = 0)
     {
         $json = ['username' => $username, 'password' => $password, 'securityCode' => (string) $code];
         if ($device_id !== 0) {
             $json['verifyType'] = 'sms';
             $json['deviceid'] = (string) $device_id;
         }
-        $result = $this->request->postJson('v2/api/auth/verify', [
-            'json' => $json,
-        ]);
+        $result = $this->request->postJson('v2/api/auth/verify', ['json' => $json]);
         if (isset($result['status'], $result['ec'], $result['em'])) {
             switch ($result['ec']) {
                 case 10004:
@@ -106,8 +94,8 @@ class Application
                     break;
                 case 10000:
                     return [
-                        'code' => 200,
-                        'msg' => 'ok',
+                        'code' => self::SUCCESS,
+                        'msg' => self::SUCCESS_MSG,
                         'data' => [
                             'status' => $result['status'],
                             'code' => $result['ec'],
@@ -117,6 +105,25 @@ class Application
                     break;
             }
         }
+    }
+
+    public function reset(string $username): array
+    {
+        $result = $this->request->postJson('v2/api/auth/reset', [
+            'json' => ['username' => $username],
+        ]);
+        if (isset($result['ec']) && $result['ec'] === 200) {
+            return [
+                'code' => self::SUCCESS,
+                'msg' => self::SUCCESS_MSG,
+                'data' => $result,
+            ];
+        }
+        return [
+            'code' => self::ERROR,
+            'msg' => self::ERROR_MSG,
+            'data' => $result,
+        ];
     }
 
     public function download(string $username, string $password): array
@@ -129,35 +136,34 @@ class Application
         ]);
         if (isset($result['status'], $result['ec']) && $result['ec'] === 200) {
             return [
-                'code' => 200,
-                'msg' => 'ok',
+                'code' => self::SUCCESS,
+                'msg' => self::SUCCESS_MSG,
                 'data' => $result['em'],
             ];
         }
         return [
-            'code' => 201,
-            'msg' => 'fail',
+            'code' => self::ERROR,
+            'msg' => self::ERROR_MSG,
             'data' => $result,
         ];
     }
 
-    public function reset(string $username): array
+    // todo 废弃接口
+    public function phones(string $username, string $password): array
     {
-        $result = $this->request->postJson('v2/api/auth/reset', [
-            'json' => ['username' => $username],
-        ]);
-        if (isset($result['ec']) && $result['ec'] === 200) {
-            return [
-                'code' => 200,
-                'msg' => 'ok',
-                'data' => $result,
+        $array = [];
+        $result = $this->request->postJson('/v2/api/auth/trustedphones', ['json' => ['username' => $username, 'password' => $password]]);
+        if (isset($result['status'], $result['ec'], $result['em'])) {
+            return $array;
+        }
+        foreach ($result as $item) {
+            $array[] = [
+                'id' => $item['id'] ?? '',
+                'phone' => $item['numberWithDialCode'] ?? '',
+                'last' => $item['lastTwoDigits'] ?? '',
             ];
         }
-        return [
-            'code' => 201,
-            'msg' => 'fail',
-            'data' => $result,
-        ];
+        return $array;
     }
 
     public function account(string $username): array
@@ -176,14 +182,14 @@ class Application
                 $list[] = $device;
             }
             return [
-                'code' => 200,
-                'msg' => 'ok',
+                'code' => self::SUCCESS,
+                'msg' => self::SUCCESS_MSG,
                 'data' => $list,
             ];
         }
         return [
-            'code' => 200,
-            'msg' => 'ok',
+            'code' => self::SUCCESS,
+            'msg' => self::SUCCESS_MSG,
             'data' => [],
         ];
     }
@@ -238,8 +244,8 @@ class Application
                 ];
             }
             return [
-                'code' => 200,
-                'msg' => 'ok',
+                'code' => self::SUCCESS,
+                'msg' => self::SUCCESS_MSG,
                 'data' => [
                     'total' => $result['totalCount'],
                     'list' => $list,
@@ -247,12 +253,102 @@ class Application
             ];
         }
         return [
-            'code' => 200,
-            'msg' => 'ok',
+            'code' => self::SUCCESS,
+            'msg' => self::SUCCESS_MSG,
             'data' => [
                 'total' => 0,
                 'list' => [],
             ],
+        ];
+    }
+
+    public function TextMessages(string $username, int $offset = 1, int $limit = 20): array
+    {
+        $result = $this->request->postJson('v2/api/database/retrieve', [
+            'json' => [
+                'username' => $username,
+                'params' => [
+                    'category' => 'SMS_CHAT_SUMMARY',
+                    'offset' => ($offset - 1) * $limit,
+                    'limit' => $limit,
+                ],
+            ],
+        ]);
+        if (isset($result['contents']) && is_array($result['contents'])) {
+            $arr = [];
+            foreach ($result['contents'] as $content) {
+                $arr[] = [
+                    'name' => trim($content['chatid']),
+                    'snippet' => str_replace('<#>', '', trim($content['snippet'])),
+                    'time' => $content['snippetTimestamp'],
+                    'count' => $content['messageCount'],
+                    'last' => $content['lastMessageSeq'],
+                ];
+            }
+
+            return [
+                'code' => self::SUCCESS,
+                'msg' => self::SUCCESS_MSG,
+                'data' => [
+                    'total' => $result['totalCount'],
+                    'data' => $arr,
+                ],
+            ];
+        }
+        return [
+            'code' => self::ERROR,
+            'msg' => self::ERROR_MSG,
+            'data' => [],
+        ];
+    }
+
+    public function TextMessage(string $username, string $rid, int $offset = 1, int $limit = 20): array
+    {
+        $result = $this->request->postJson('v2/api/database/retrieve', [
+            'json' => [
+                'username' => $username,
+                'params' => [
+                    'category' => 'SMS_CHAT_DETAIL',
+                    'offset' => ($offset - 1) * $limit,
+                    'limit' => $limit,
+                    'rid' => 'SMS;-;' . $rid,
+                ],
+            ],
+        ]);
+        if (isset($result['contents']) && is_array($result['contents'])) {
+            $arr = [];
+            foreach ($result['contents'] as $content) {
+                $arr[] = [
+                    'id' => $content['guid'],
+                    'time' => $content['date'],
+                    'text' => str_replace('<#>', '', trim($content['text'])),
+                    'type' => $content['service'],
+                    'status' => $content['isDelivered'],
+                    'is_emote' => $content['isEmote'],
+                    'is_from_me' => $content['isFromMe'],
+                    'is_attachment' => $content['isAttachment'],
+                    'attachment' => [
+                        'id' => $content['attachment']['guid'],
+                        'mimeType' => $content['attachment']['mimeType'],
+                        'transferState' => $content['attachment']['transferState'],
+                        'isOutgoing' => $content['attachment']['isOutgoing'],
+                        'url' => $content['attachment']['url'],
+                    ],
+                ];
+            }
+            return [
+                'code' => self::SUCCESS,
+                'msg' => self::SUCCESS_MSG,
+                'data' => [
+                    'total' => $result['totalCount'],
+                    'data' => $arr,
+                ],
+            ];
+        }
+        return [
+            'code' => self::ERROR,
+            'msg' => self::ERROR_MSG,
+            'data' => [],
         ];
     }
 
@@ -286,8 +382,8 @@ class Application
                 ];
             }
             return [
-                'code' => 200,
-                'msg' => 'ok',
+                'code' => self::SUCCESS,
+                'msg' => self::SUCCESS_MSG,
                 'data' => [
                     'total' => $result['totalCount'],
                     'list' => $list,
@@ -295,8 +391,8 @@ class Application
             ];
         }
         return [
-            'code' => 200,
-            'msg' => 'ok',
+            'code' => self::SUCCESS,
+            'msg' => self::SUCCESS_MSG,
             'data' => [
                 'total' => 0,
                 'list' => [],
@@ -319,29 +415,28 @@ class Application
         ]);
         if (isset($result['totalCount']) && $result['totalCount'] > 0 && isset($result['contents'])) {
             $list = [];
-            foreach ($result['contents'] as $content) {
+            foreach ($result['contents'] as $key => $content) {
+                $url = getEscape($content['original']['url']);
+                $type = empty($content['heif2jpg']['type']) ? strtolower($content['original']['type']) : strtolower($content['heif2jpg']['type']);
+                if (! in_array($type, ['mov', 'mp4'])) {
+                    if (empty($content['heif2jpg']['type']) && ! empty($content['thumb']['url'])) {
+                        $url = getEscape($content['thumb']['url']);
+                    } elseif (! empty($content['heif2jpg']['url'])) {
+                        $url = getEscape($content['heif2jpg']['url']);
+                    }
+                }
                 $list[] = [
                     'id' => md5($content['id']),
                     'filename' => str_replace('./', '', getEscape($content['filename'])),
-                    'created' => (new Carbon())->create($content['created'])->toDateTimeString(),
-                    'type' => empty($content['heif2jpg']['type']) ? strtolower($content['original']['type']) : strtolower($content['heif2jpg']['type']),
-                    'original' => array_merge($content['original'], [
-                        'url' => getEscape($content['original']['url']),
-                    ]),
-                    'medium' => array_merge($content['medium'], [
-                        'url' => getEscape($content['medium']['url']),
-                    ]),
-                    'thumb' => array_merge($content['thumb'], [
-                        'url' => getEscape($content['thumb']['url']),
-                    ]),
-                    'heif2jpg' => array_merge($content['heif2jpg'], [
-                        'url' => getEscape($content['heif2jpg']['url']),
-                    ]),
+                    'type' => $type,
+                    'created' => $this->now->create($content['created'])->toDateTimeString(),
+                    'original' => getEscape($content['original']['url']),
+                    'url' => $url,
                 ];
             }
             return [
-                'code' => 200,
-                'msg' => 'ok',
+                'code' => self::SUCCESS,
+                'msg' => self::SUCCESS_MSG,
                 'data' => [
                     'total' => $result['totalCount'],
                     'list' => $list,
@@ -349,8 +444,8 @@ class Application
             ];
         }
         return [
-            'code' => 200,
-            'msg' => 'ok',
+            'code' => self::SUCCESS,
+            'msg' => self::SUCCESS_MSG,
             'data' => [
                 'total' => 0,
                 'list' => [],
@@ -402,10 +497,10 @@ class Application
                             'type' => strtolower($child['type']),
                             'icon' => 'folder',
                             'size' => empty($child['assetQuota']) ? '0KB' : format_size($child['assetQuota']),
-                            'create_time' => (new Carbon())->create($child['dateCreated'])->toDateTimeString(),
-                            'modify_time' => (new Carbon())->create($child['dateModified'])->toDateTimeString(),
-                            'update_time' => (new Carbon())->create($child['dateChanged'])->toDateTimeString(),
-                            'last_time' => (new Carbon())->create($child['lastOpenTime'])->toDateTimeString(),
+                            'create_time' => $this->now->create($child['dateCreated'])->toDateTimeString(),
+                            'modify_time' => $this->now->create($child['dateModified'])->toDateTimeString(),
+                            'update_time' => $this->now->create($child['dateChanged'])->toDateTimeString(),
+                            'last_time' => $this->now->create($child['lastOpenTime'])->toDateTimeString(),
                             'url' => empty($child['url']) ? '' : $child['url'],
                         ];
                     } else {
@@ -415,10 +510,10 @@ class Application
                             'parentId' => str_replace('FOLDER::com.apple.CloudDocs::', '', $child['parentId']),
                             'type' => strtolower($child['type']),
                             'icon' => empty($child['extension']) ? 'rar' : getExtension($child['extension']),
-                            'create_time' => (new Carbon())->create($child['dateCreated'])->toDateTimeString(),
-                            'modify_time' => (new Carbon())->create($child['dateModified'])->toDateTimeString(),
-                            'update_time' => (new Carbon())->create($child['dateChanged'])->toDateTimeString(),
-                            'last_time' => (new Carbon())->create($child['lastOpenTime'])->toDateTimeString(),
+                            'create_time' => $this->now->create($child['dateCreated'])->toDateTimeString(),
+                            'modify_time' => $this->now->create($child['dateModified'])->toDateTimeString(),
+                            'update_time' => $this->now->create($child['dateChanged'])->toDateTimeString(),
+                            'last_time' => $this->now->create($child['lastOpenTime'])->toDateTimeString(),
                             'url' => empty($child['url']) ? '' : $child['url'],
                             'size' => empty($child['size']) ? '0KB' : format_size($child['size']),
                             'extension' => empty($child['extension']) ? '' : trim($child['extension']),
@@ -427,14 +522,14 @@ class Application
                 }
             }
             return [
-                'code' => 200,
-                'msg' => 'ok',
+                'code' => self::SUCCESS,
+                'msg' => self::SUCCESS_MSG,
                 'data' => $data,
             ];
         }
         return [
-            'code' => 200,
-            'msg' => 'ok',
+            'code' => self::SUCCESS,
+            'msg' => self::SUCCESS_MSG,
             'data' => [
                 'total' => 0,
                 'folder' => [],
@@ -468,25 +563,36 @@ class Application
                     'symbolicColor' => $content['symbolicColor'],
                     'enabled' => $content['enabled'],
                     'url' => empty($content['prePublishedUrl']) ? '' : $content['prePublishedUrl'],
-                    'create_time' => (new Carbon())->create($content['createdDate'][1] . '-' . $content['createdDate'][2] . '-' . $content['createdDate'][3] . ' ' . $content['createdDate'][4] . ':' . $content['createdDate'][5] . ':00')->toDateTimeString(),
-                    'modify_time' => (new Carbon())->create($content['lastModifiedDate'][1] . '-' . $content['lastModifiedDate'][2] . '-' . $content['lastModifiedDate'][3] . ' ' . $content['lastModifiedDate'][4] . ':' . $content['lastModifiedDate'][5] . ':00')->toDateTimeString(),
+                    'create_time' => $this->now->create($content['createdDate'][1] . '-' . $content['createdDate'][2] . '-' . $content['createdDate'][3] . ' ' . $content['createdDate'][4] . ':' . $content['createdDate'][5] . ':00')->toDateTimeString(),
+                    'modify_time' => $this->now->create($content['lastModifiedDate'][1] . '-' . $content['lastModifiedDate'][2] . '-' . $content['lastModifiedDate'][3] . ' ' . $content['lastModifiedDate'][4] . ':' . $content['lastModifiedDate'][5] . ':00')->toDateTimeString(),
                 ];
             }
-            return [
-                'code' => 200,
-                'msg' => 'ok',
-                'data' => [
+            // 默认用日历数据，如果有事件，就显示事件列表
+            $res = $this->events($username, $offset, $limit);
+            $data = [
+                'calendar' => [
                     'total' => $result['totalCount'],
                     'list' => $list,
                 ],
+                'total' => $res['data']['total'],
+                'list' => $res['data']['list'],
+            ];
+            return [
+                'code' => self::SUCCESS,
+                'msg' => self::SUCCESS_MSG,
+                'data' => $data,
             ];
         }
         return [
-            'code' => 200,
-            'msg' => 'ok',
+            'code' => self::SUCCESS,
+            'msg' => self::SUCCESS_MSG,
             'data' => [
                 'total' => 0,
                 'list' => [],
+                'calendar' => [
+                    'total' => 0,
+                    'list' => [],
+                ],
             ],
         ];
     }
@@ -505,12 +611,25 @@ class Application
         ]);
         if (isset($result['contents']) && is_array($result['contents'])) {
             $list = [];
-            foreach ($result['contents'] as $content) {
-                $list[] = $content;
+            foreach ($result['contents'] as $key => $item) {
+                $list[] = [
+                    'title' => $item['title'],
+                    'type' => $item['pGuid'],
+                    'order' => $key + 1,
+                    'borderColor' => '',
+                    'backgroundColor' => '',
+                    'tz' => $item['tz'],
+                    'tzname' => $item['tzname'],
+                    'allDay' => $item['allDay'],
+                    'startDateTZOffset' => $item['startDateTZOffset'],
+                    'duration' => $item['duration'],
+                    'start' => $this->now->create($item['startDate'][1] . '-' . $item['startDate'][2] . '-' . $item['startDate'][3] . ' ' . $item['startDate'][4] . ':' . $item['startDate'][5] . ':00')->toDayDateTimeString(),
+                    'end' => $this->now->create($item['endDate'][1] . '-' . $item['endDate'][2] . '-' . $item['endDate'][3] . ' ' . $item['endDate'][4] . ':' . $item['endDate'][5] . ':00')->toDayDateTimeString(),
+                ];
             }
             return [
-                'code' => 200,
-                'msg' => 'ok',
+                'code' => self::SUCCESS,
+                'msg' => self::SUCCESS_MSG,
                 'data' => [
                     'total' => $result['totalCount'],
                     'list' => $list,
@@ -518,8 +637,8 @@ class Application
             ];
         }
         return [
-            'code' => 200,
-            'msg' => 'ok',
+            'code' => self::SUCCESS,
+            'msg' => self::SUCCESS_MSG,
             'data' => [
                 'total' => 0,
                 'list' => [],
@@ -542,13 +661,13 @@ class Application
         if (isset($result['contents']) && is_array($result['contents'])) {
             $list = [];
             foreach ($result['contents'] as $content) {
-                $content['created'] = empty($content['created']) ? (new Carbon())->toDateTimeString() : (new Carbon())->create(date('Y-m-d H:i:s', intval($content['created'] / 1000)))->toDateTimeString();
-                $content['modified'] = empty($content['modified']) ? (new Carbon())->toDateTimeString() : (new Carbon())->create(date('Y-m-d H:i:s', intval($content['modified'] / 1000)))->toDateTimeString();
+                $content['created'] = empty($content['created']) ? $this->now->toDateTimeString() : $this->now->create(date('Y-m-d H:i:s', intval($content['created'] / 1000)))->toDateTimeString();
+                $content['modified'] = empty($content['modified']) ? $this->now->toDateTimeString() : $this->now->create(date('Y-m-d H:i:s', intval($content['modified'] / 1000)))->toDateTimeString();
                 $list[] = $content;
             }
             return [
-                'code' => 200,
-                'msg' => 'ok',
+                'code' => self::SUCCESS,
+                'msg' => self::SUCCESS_MSG,
                 'data' => [
                     'total' => $result['totalCount'],
                     'list' => $list,
@@ -556,8 +675,8 @@ class Application
             ];
         }
         return [
-            'code' => 200,
-            'msg' => 'ok',
+            'code' => self::SUCCESS,
+            'msg' => self::SUCCESS_MSG,
             'data' => [
                 'total' => 0,
                 'list' => [],
@@ -565,7 +684,7 @@ class Application
         ];
     }
 
-    public function reminders(string $username): array
+    public function reminders(string $username, string $rid = 'root', int $offset = 1, int $limit = 20): array
     {
         $result = $this->request->postJson('v2/api/database/retrieve', [
             'json' => [
@@ -576,30 +695,51 @@ class Application
             ],
         ]);
         if (isset($result['contents']['Collections']) && is_array($result['contents']['Collections'])) {
-            $list = [];
-            foreach ($result['contents']['Collections'] as $content) {
-                $list[] = $content;
+            $menu = [];
+            foreach ($result['contents']['Collections'] as $key => $content) {
+                $menu[$key] = [
+                    'id' => $content['guid'],
+                    'title' => $content['title'],
+                    'order' => $content['order'],
+                    'color' => $content['color'],
+                    'symbolicColor' => $content['symbolicColor'],
+                    'create_time' => $this->now->create($content['createdDate'][1] . '-' . $content['createdDate'][2] . '-' . $content['createdDate'][3] . ' ' . $content['createdDate'][4] . ':' . $content['createdDate'][5] . ':00')->toDateTimeString(),
+                    'enabled' => $content['enabled'],
+                    'active' => false,
+                    'total' => $content['totalCount'],
+                ];
+                if ($rid === 'root' || $content['guid'] === 'tasks') {
+                    $menu[$key]['active'] = true;
+                }
             }
+            // 按照字段重新排序
+            $sort = array_column($menu, 'order');
+            array_multisort($sort, SORT_ASC, $menu);
+            if ($rid == 'root') {
+                $rid = $menu[0]['id'];
+            }
+            $res = $this->reminder($username, $rid, $offset, $limit);
+            $data['menu'] = $menu;
+            $data['total'] = $res['data']['total'];
+            $data['list'] = $res['data']['list'];
             return [
-                'code' => 200,
-                'msg' => 'ok',
-                'data' => [
-                    'total' => $result['totalCount'],
-                    'list' => $list,
-                ],
+                'code' => self::SUCCESS,
+                'msg' => self::SUCCESS_MSG,
+                'data' => $data,
             ];
         }
         return [
-            'code' => 200,
-            'msg' => 'ok',
+            'code' => self::SUCCESS,
+            'msg' => self::SUCCESS_MSG,
             'data' => [
                 'total' => 0,
                 'list' => [],
+                'menu' => [],
             ],
         ];
     }
 
-    public function reminder(string $username, string $guid = 'root', int $offset = 1, int $limit = 20)
+    private function reminder(string $username, string $guid = 'root', int $offset = 1, int $limit = 20)
     {
         $result = $this->request->postJson('v2/api/database/retrieve', [
             'json' => [
@@ -615,12 +755,17 @@ class Application
         if (isset($result['contents']['Reminders']) && is_array($result['contents']['Reminders'])) {
             $list = [];
             foreach ($result['contents']['Reminders'] as $key => $item) {
-                $item['create_time'] = (new Carbon())->create($item['createdDate'][1] . '-' . $item['createdDate'][2] . '-' . $item['createdDate'][3] . ' ' . $item['createdDate'][4] . ':' . $item['createdDate'][5])->toDateTimeString();
-                $list[$key] = $item;
+                $list[$key] = [
+                    'id' => $item['guid'],
+                    'title' => $item['title'],
+                    'type' => $item['pGuid'],
+                    'modify_time' => $this->now->create($item['lastModifiedDate'][1] . '-' . $item['lastModifiedDate'][2] . '-' . $item['lastModifiedDate'][3] . ' ' . $item['lastModifiedDate'][4] . ':' . $item['lastModifiedDate'][5])->toDateTimeString(),
+                    'create_time' => $this->now->create($item['createdDate'][1] . '-' . $item['createdDate'][2] . '-' . $item['createdDate'][3] . ' ' . $item['createdDate'][4] . ':' . $item['createdDate'][5])->toDateTimeString(),
+                ];
             }
             return [
-                'code' => 200,
-                'msg' => 'ok',
+                'code' => self::SUCCESS,
+                'msg' => self::SUCCESS_MSG,
                 'data' => [
                     'total' => $result['totalCount'],
                     'list' => $list,
@@ -628,8 +773,8 @@ class Application
             ];
         }
         return [
-            'code' => 200,
-            'msg' => 'ok',
+            'code' => self::SUCCESS,
+            'msg' => self::SUCCESS_MSG,
             'data' => [
                 'total' => 0,
                 'list' => [],
