@@ -9,7 +9,7 @@ declare(strict_types=1);
  */
 namespace Tests;
 
-use Cloud\Icloud\Application;
+use Cloud\Application;
 use PHPUnit\Framework\TestCase;
 
 /**
