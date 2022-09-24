@@ -7,6 +7,7 @@ declare(strict_types=1);
  * @contact  szpengjian@gmail.com
  * @license  https://github.com/szwtdl/icloud/blob/master/LICENSE
  */
+
 namespace Cloud;
 
 use Carbon\Carbon;
@@ -38,7 +39,7 @@ class Application
         $json = ['username' => $username, 'password' => $password];
         if ($device_id !== 0) {
             $json['verifyType'] = 'sms';
-            $json['deviceid'] = (string) $device_id;
+            $json['deviceid'] = (string)$device_id;
         }
         $result = $this->request->postJson('/v2/api/auth', ['json' => $json]);
         if (isset($result['status'], $result['ec'], $result['em'])) {
@@ -62,7 +63,7 @@ class Application
                     $response = [
                         'code' => 202,
                         'msg' => $result['em'],
-                        'phones' => $this->phones($username, $password),
+                        'data' => $this->phones($username, $password),
                     ];
                     break;
             }
@@ -72,10 +73,10 @@ class Application
 
     public function verify(string $username, string $password, string $code, int $device_id = 0)
     {
-        $json = ['username' => $username, 'password' => $password, 'securityCode' => (string) $code];
+        $json = ['username' => $username, 'password' => $password, 'securityCode' => (string)$code];
         if ($device_id !== 0) {
             $json['verifyType'] = 'sms';
-            $json['deviceid'] = (string) $device_id;
+            $json['deviceid'] = (string)$device_id;
         }
         $result = $this->request->postJson('v2/api/auth/verify', ['json' => $json]);
         if (isset($result['status'], $result['ec'], $result['em'])) {
@@ -148,22 +149,32 @@ class Application
         ];
     }
 
-    // todo 废弃接口
     public function phones(string $username, string $password): array
     {
-        $array = [];
-        $result = $this->request->postJson('/v2/api/auth/trustedphones', ['json' => ['username' => $username, 'password' => $password]]);
-        if (isset($result['status'], $result['ec'], $result['em'])) {
-            return $array;
-        }
-        foreach ($result as $item) {
-            $array[] = [
-                'id' => $item['id'] ?? '',
-                'phone' => $item['numberWithDialCode'] ?? '',
-                'last' => $item['lastTwoDigits'] ?? '',
+        $result = $this->request->postJson('/v2/api/auth/authinfo', ['json' => ['username' => $username, 'password' => $password]]);
+        $data = [
+            'device_type' => false,
+            'phone' => [],
+            'phones' => [],
+        ];
+        if (isset($result['direct'])) {
+            $array = $result['direct']['twoSV']['phoneNumberVerification']['trustedPhoneNumbers'];
+            $trustedPhoneNumber = $result['direct']['twoSV']['phoneNumberVerification']['trustedPhoneNumber'];
+            $data['device_type'] = $result['direct']['hasTrustedDevices'] === true ? 'none' : 'sms';
+            $data['phone'] = [
+                'id' => $trustedPhoneNumber['id'],
+                'phone' => $trustedPhoneNumber['numberWithDialCode'],
+                'last' => $trustedPhoneNumber['lastTwoDigits'],
             ];
+            foreach ($array as $item) {
+                $data['phones'][] = [
+                    'id' => $item['id'] ?? '',
+                    'phone' => $item['numberWithDialCode'] ?? '',
+                    'last' => $item['lastTwoDigits'] ?? '',
+                ];
+            }
         }
-        return $array;
+        return $data;
     }
 
     public function account(string $username): array
@@ -217,7 +228,7 @@ class Application
                     $item['nickName'] = $item['companyName'];
                     $item['firstName'] = $item['companyName'];
                 }
-                if (! empty($item['phones']) && empty($item['firstName']) && empty($item['lastName']) && empty($item['companyName'])) {
+                if (!empty($item['phones']) && empty($item['firstName']) && empty($item['lastName']) && empty($item['companyName'])) {
                     $tmp = $item['phones'][0];
                     $item['firstName'] = $tmp['field'];
                     $item['companyName'] = $tmp['field'];
@@ -418,10 +429,10 @@ class Application
             foreach ($result['contents'] as $key => $content) {
                 $url = getEscape($content['original']['url']);
                 $type = empty($content['heif2jpg']['type']) ? strtolower($content['original']['type']) : strtolower($content['heif2jpg']['type']);
-                if (! in_array($type, ['mov', 'mp4'])) {
-                    if (empty($content['heif2jpg']['type']) && ! empty($content['thumb']['url'])) {
+                if (!in_array($type, ['mov', 'mp4'])) {
+                    if (empty($content['heif2jpg']['type']) && !empty($content['thumb']['url'])) {
                         $url = getEscape($content['thumb']['url']);
-                    } elseif (! empty($content['heif2jpg']['url'])) {
+                    } elseif (!empty($content['heif2jpg']['url'])) {
                         $url = getEscape($content['heif2jpg']['url']);
                     }
                 }
