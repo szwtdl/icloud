@@ -296,8 +296,8 @@ class Application
             ];
         }
         return [
-            'code' => self::ERROR,
-            'msg' => self::ERROR_MSG,
+            'code' => self::SUCCESS,
+            'msg' => self::SUCCESS_MSG,
             'data' => [],
         ];
     }
