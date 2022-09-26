@@ -427,10 +427,12 @@ class Application
             $list = [];
             foreach ($result['contents'] as $key => $content) {
                 $url = getEscape($content['original']['url']);
-                $type = empty($content['heif2jpg']['type']) ? strtolower($content['original']['type']) : strtolower($content['heif2jpg']['type']);
+                $type = empty($content['heif2jpg']['type']) ? strtolower(pathinfo($content['filename'])['extension']) : strtolower($content['heif2jpg']['type']);
                 if (! in_array($type, ['mov', 'mp4'])) {
-                    if (empty($content['heif2jpg']['type']) && ! empty($content['thumb']['url'])) {
+                    if (empty($content['heif2jpg']['type']) && ! empty($content['thumb']['url']) && $content['original']['type'] == $content['thumb']['type']) {
                         $url = getEscape($content['thumb']['url']);
+                    } elseif (empty($content['heif2jpg']['type']) && ! empty($content['thumb']['url']) && $content['original']['type'] != $content['thumb']['type']) {
+                        $url = getEscape($content['original']['url']);
                     } elseif (! empty($content['heif2jpg']['url'])) {
                         $url = getEscape($content['heif2jpg']['url']);
                     }
