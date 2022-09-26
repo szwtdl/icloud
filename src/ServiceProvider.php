@@ -22,7 +22,6 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
                 'options' => [
                     'base_uri' => config('services.icloud.domain'),
                 ],
-                'log' => config('services.icloud.log'),
             ]);
         });
         $this->app->alias(Application::class, 'icloud');

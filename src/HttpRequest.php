@@ -7,7 +7,6 @@ declare(strict_types=1);
  * @contact  szpengjian@gmail.com
  * @license  https://github.com/szwtdl/icloud/blob/master/LICENSE
  */
-
 namespace Cloud;
 
 use GuzzleHttp\Client;
@@ -22,11 +21,6 @@ class HttpRequest
         'options' => [
             'base_uri' => 'http://localhost:8080',
             'timeout' => 0,
-        ],
-        'log' => [
-            'default' => 'dev', // dev or prod
-            'path' => './tmp/icloud.log',
-            'level' => 'debug',
         ],
     ];
 
