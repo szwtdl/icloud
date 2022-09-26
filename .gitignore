@@ -1,5 +1,6 @@
 .idea
 /vendor
+/tmp
 composer.lock
 http-client.env.json
 index.php

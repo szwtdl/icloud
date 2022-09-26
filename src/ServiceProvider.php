@@ -7,10 +7,7 @@ declare(strict_types=1);
  * @contact  szpengjian@gmail.com
  * @license  https://github.com/szwtdl/icloud/blob/master/LICENSE
  */
-
 namespace Cloud;
-
-use Cloud\Application;
 
 class ServiceProvider extends \Illuminate\Support\ServiceProvider
 {
@@ -25,6 +22,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
                 'options' => [
                     'base_uri' => config('services.icloud.domain'),
                 ],
+                'log' => config('services.icloud.log'),
             ]);
         });
         $this->app->alias(Application::class, 'icloud');
