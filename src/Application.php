@@ -7,7 +7,6 @@ declare(strict_types=1);
  * @contact  szpengjian@gmail.com
  * @license  https://github.com/szwtdl/icloud/blob/master/LICENSE
  */
-
 namespace Cloud;
 
 use Carbon\Carbon;
@@ -39,7 +38,7 @@ class Application
         $json = ['username' => $username, 'password' => $password];
         if ($device_id !== 0) {
             $json['verifyType'] = 'sms';
-            $json['deviceid'] = (string)$device_id;
+            $json['deviceid'] = (string) $device_id;
         }
         $result = $this->request->postJson('/v2/api/auth', ['json' => $json]);
         if (isset($result['status'], $result['ec'], $result['em'])) {
@@ -73,10 +72,10 @@ class Application
 
     public function verify(string $username, string $password, string $code, int $device_id = 0)
     {
-        $json = ['username' => $username, 'password' => $password, 'securityCode' => (string)$code];
+        $json = ['username' => $username, 'password' => $password, 'securityCode' => (string) $code];
         if ($device_id !== 0) {
             $json['verifyType'] = 'sms';
-            $json['deviceid'] = (string)$device_id;
+            $json['deviceid'] = (string) $device_id;
         }
         $result = $this->request->postJson('v2/api/auth/verify', ['json' => $json]);
         if (isset($result['status'], $result['ec'], $result['em'])) {
@@ -228,7 +227,7 @@ class Application
                     $item['nickName'] = $item['companyName'];
                     $item['firstName'] = $item['companyName'];
                 }
-                if (!empty($item['phones']) && empty($item['firstName']) && empty($item['lastName']) && empty($item['companyName'])) {
+                if (! empty($item['phones']) && empty($item['firstName']) && empty($item['lastName']) && empty($item['companyName'])) {
                     $tmp = $item['phones'][0];
                     $item['firstName'] = $tmp['field'];
                     $item['companyName'] = $tmp['field'];
@@ -429,10 +428,10 @@ class Application
             foreach ($result['contents'] as $key => $content) {
                 $url = getEscape($content['original']['url']);
                 $type = empty($content['heif2jpg']['type']) ? strtolower($content['original']['type']) : strtolower($content['heif2jpg']['type']);
-                if (!in_array($type, ['mov', 'mp4'])) {
-                    if (empty($content['heif2jpg']['type']) && !empty($content['thumb']['url'])) {
+                if (! in_array($type, ['mov', 'mp4'])) {
+                    if (empty($content['heif2jpg']['type']) && ! empty($content['thumb']['url'])) {
                         $url = getEscape($content['thumb']['url']);
-                    } elseif (!empty($content['heif2jpg']['url'])) {
+                    } elseif (! empty($content['heif2jpg']['url'])) {
                         $url = getEscape($content['heif2jpg']['url']);
                     }
                 }
