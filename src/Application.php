@@ -11,7 +11,6 @@ declare(strict_types=1);
 namespace Cloud;
 
 use Carbon\Carbon;
-use function _PHPStan_3bfe2e67c\React\Promise\Stream\first;
 
 class Application
 {
@@ -74,7 +73,7 @@ class Application
 
     public function verify(string $username, string $password, string $code, int $device_id = 0)
     {
-        $json = ['username' => $username, 'password' => $password, 'securityCode' => (string)$code];
+        $json = ['username' => $username, 'password' => $password, 'securityCode' => $code];
         if ($device_id !== 0) {
             $json['verifyType'] = 'sms';
             $json['deviceid'] = (string)$device_id;
@@ -431,25 +430,28 @@ class Application
         if (isset($result['totalCount']) && $result['totalCount'] > 0 && isset($result['contents'])) {
             $list = [];
             foreach ($result['contents'] as $key => $content) {
-                $url = getEscape($content['original']['url']);
-                $type = empty($content['heif2jpg']['type']) ? strtolower(pathinfo($content['filename'])['extension']) : strtolower($content['heif2jpg']['type']);
-                if (!in_array($type, ['mov', 'mp4'])) {
-                    if (empty($content['heif2jpg']['type']) && !empty($content['thumb']['url']) && $content['original']['type'] == $content['thumb']['type']) {
-                        $url = getEscape($content['thumb']['url']);
-                    } elseif (empty($content['heif2jpg']['type']) && !empty($content['thumb']['url']) && $content['original']['type'] != $content['thumb']['type']) {
-                        $url = getEscape($content['original']['url']);
-                    } elseif (!empty($content['heif2jpg']['url'])) {
-                        $url = getEscape($content['heif2jpg']['url']);
-                    }
+                $type = strtolower(pathinfo($content['medium']['url'])['extension']);
+                if (in_array($type, ['mov', 'mp4'])) {
+                    $list[] = [
+                        'id' => md5($content['id']),
+                        'filename' => str_replace('./', '', getEscape($content['filename'])),
+                        'type' => strtolower(pathinfo($content['medium']['url'])['extension']),
+                        'created' => $this->now->create($content['created'])->toDateTimeString(),
+                        'poster' => isset($content['cover']['url']) ? trim($content['cover']['url']) : '',
+                        'duration' => isset($content['cover']['duration']) ? trim($content['cover']['duration']) : '0.00',
+                        'original' => getEscape($content['medium']['url']),
+                        'url' => getEscape($content['thumb']['url']),
+                    ];
+                } else {
+                    $list[] = [
+                        'id' => md5($content['id']),
+                        'filename' => str_replace('./', '', getEscape($content['filename'])),
+                        'type' => strtolower(pathinfo($content['medium']['url'])['extension']),
+                        'created' => $this->now->create($content['created'])->toDateTimeString(),
+                        'original' => getEscape($content['medium']['url']),
+                        'url' => getEscape($content['thumb']['url']),
+                    ];
                 }
-                $list[] = [
-                    'id' => md5($content['id']),
-                    'filename' => str_replace('./', '', getEscape($content['filename'])),
-                    'type' => $type,
-                    'created' => $this->now->create($content['created'])->toDateTimeString(),
-                    'original' => getEscape($content['original']['url']),
-                    'url' => $url,
-                ];
             }
             return [
                 'code' => self::SUCCESS,
