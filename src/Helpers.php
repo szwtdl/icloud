@@ -62,6 +62,15 @@ if (! function_exists('getExtension')) {
         return 'empty';
     }
 }
+
+if (! function_exists('format_duration')) {
+    function format_duration(int $duration): string
+    {
+        $minute = $duration / 60 < 10 ? '0' . intval($duration / 60) : $duration / 60;
+        $second = $duration % 60 < 10 ? '0' . intval($duration % 60) : $duration % 60;
+        return $minute . ':' . $second;
+    }
+}
 if (! function_exists('format_size')) {
     function format_size($file_size): string
     {

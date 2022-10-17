@@ -7,7 +7,6 @@ declare(strict_types=1);
  * @contact  szpengjian@gmail.com
  * @license  https://github.com/szwtdl/icloud/blob/master/LICENSE
  */
-
 namespace Cloud;
 
 use Carbon\Carbon;
@@ -39,7 +38,7 @@ class Application
         $json = ['username' => $username, 'password' => $password];
         if ($device_id !== 0) {
             $json['verifyType'] = 'sms';
-            $json['deviceid'] = (string)$device_id;
+            $json['deviceid'] = (string) $device_id;
         }
         $result = $this->request->postJson('/v2/api/auth', ['json' => $json]);
         if (isset($result['status'], $result['ec'], $result['em'])) {
@@ -76,7 +75,7 @@ class Application
         $json = ['username' => $username, 'password' => $password, 'securityCode' => $code];
         if ($device_id !== 0) {
             $json['verifyType'] = 'sms';
-            $json['deviceid'] = (string)$device_id;
+            $json['deviceid'] = (string) $device_id;
         }
         $result = $this->request->postJson('v2/api/auth/verify', ['json' => $json]);
         if (isset($result['status'], $result['ec'], $result['em'])) {
@@ -231,7 +230,7 @@ class Application
                     $item['nickName'] = $item['companyName'];
                     $item['firstName'] = $item['companyName'];
                 }
-                if (!empty($item['phones']) && empty($item['firstName']) && empty($item['lastName']) && empty($item['companyName'])) {
+                if (! empty($item['phones']) && empty($item['firstName']) && empty($item['lastName']) && empty($item['companyName'])) {
                     $tmp = $item['phones'][0];
                     $item['firstName'] = $tmp['field'];
                     $item['companyName'] = $tmp['field'];
@@ -438,7 +437,7 @@ class Application
                         'type' => strtolower(pathinfo($content['medium']['url'])['extension']),
                         'created' => $this->now->create($content['created'])->toDateTimeString(),
                         'poster' => isset($content['cover']['url']) ? trim($content['cover']['url']) : '',
-                        'duration' => isset($content['cover']['duration']) ? trim($content['cover']['duration']) : '0.00',
+                        'duration' => isset($content['cover']['duration']) ? format_duration((int) $content['cover']['duration']) : '0.00',
                         'original' => getEscape($content['medium']['url']),
                         'url' => getEscape($content['thumb']['url']),
                     ];
