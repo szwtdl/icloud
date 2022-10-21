@@ -429,12 +429,12 @@ class Application
         if (isset($result['totalCount']) && $result['totalCount'] > 0 && isset($result['contents'])) {
             $list = [];
             foreach ($result['contents'] as $key => $content) {
-                $type = strtolower(pathinfo($content['medium']['url'])['extension']);
+                $type = empty($content['medium']['url']) ? strtolower(pathinfo($content['original']['url'])['extension']) : strtolower(pathinfo($content['medium']['url'])['extension']);
                 if (in_array($type, ['mov', 'mp4'])) {
                     $list[] = [
                         'id' => md5($content['id']),
                         'filename' => str_replace('./', '', getEscape($content['filename'])),
-                        'type' => strtolower(pathinfo($content['medium']['url'])['extension']),
+                        'type' => $type,
                         'created' => $this->now->create($content['created'])->toDateTimeString(),
                         'poster' => isset($content['cover']['url']) ? trim($content['cover']['url']) : '',
                         'duration' => isset($content['cover']['duration']) ? format_duration((int) $content['cover']['duration']) : '0.00',
@@ -445,7 +445,7 @@ class Application
                     $list[] = [
                         'id' => md5($content['id']),
                         'filename' => str_replace('./', '', getEscape($content['filename'])),
-                        'type' => strtolower(pathinfo($content['medium']['url'])['extension']),
+                        'type' => $type,
                         'created' => $this->now->create($content['created'])->toDateTimeString(),
                         'original' => getEscape($content['medium']['url']),
                         'url' => getEscape($content['thumb']['url']),
