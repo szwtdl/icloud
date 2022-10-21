@@ -447,7 +447,7 @@ class Application
                         'filename' => str_replace('./', '', getEscape($content['filename'])),
                         'type' => $type,
                         'created' => $this->now->create($content['created'])->toDateTimeString(),
-                        'original' => getEscape($content['medium']['url']),
+                        'original' => empty($content['medium']['url']) ? getEscape($content['original']['url']) : getEscape($content['medium']['url']),
                         'url' => getEscape($content['thumb']['url']),
                     ];
                 }
